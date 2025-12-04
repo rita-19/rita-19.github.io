@@ -1,5 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>Study Galaxy RPG 小雞冒險版</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body {
+  margin:0; padding:0;
+  font-family:"Microsoft JhengHei",sans-serif;
+  background: linear-gradient(#ffe6f7,#d6e8ff);
+  text-align:center;
+  transition: all 0.5s;
+  color:#000;
+}
+.btn{
+  padding:10px 15px;
+  margin:5px;
+  border:none;
+  border-radius:12px;
+  background:#ffb8d1;
+  font-size:16px;
+  cursor:pointer;
+  transition:0.3s;
+}
+.btn:hover{background:#ff95be;transform:scale(1.05);}
+.card{
+  display:inline-block;
+  background:white;
+  padding:20px;
+  margin:15px;
+  border-radius:20px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.15);
+  width:280px;
+  transition:0.3s;
+}
+.card:hover{transform:scale(1.05);}
+.level-bar{
+  width:80%; height:20px;
+  background:#fff;
+  border-radius:10px;
+  margin:10px auto;
+  overflow:hidden;
+  box-shadow: inset 2px 2px 5px rgba(0,0,0,0.1);
+}
+.level-progress{
+  height:100%;
+  background: linear-gradient(90deg,#ff95be,#ffb8d1);
+  width:0%;
+  transition: width 0.5s;
+}
+.chick-container{
+  width:200px;
+  margin:15px auto;
+  transition: all 0.5s;
+}
+.chick-svg{width:100%;height:auto;}
+.chick-glow{filter: drop-shadow(0 0 20px yellow); transform: scale(1.2);}
+.chat-input{width:70%; padding:8px; border-radius:10px; border:1px solid #ccc; margin-right:5px;}
+.section{display:none;}
+</style>
+</head>
+<body>
+
+<h1>🌟 Study Galaxy – RPG 小雞冒險版</h1>
+<p>小雞助教陪你學習冒險！</p>
+
+<div>
+  <button class="btn" onclick="showSection('home')">🏠 首頁</button>
+  <button class="btn" onclick="showSection('pomodoro')">🍅 番茄鐘</button>
+  <button class="btn" onclick="showSection('quiz')">🎮 小測驗</button>
+  <button class="btn" onclick="showSection('ai')">✨ AI 小老師</button>
+  <button class="btn" onclick="showSection('chart')">📊 讀書數據</button>
+  <button class="btn" onclick="toggleMode()">🌙 深色模式</button>
+</div>
+
+<hr style="opacity:0.3; width:80%; margin:20px auto;">
+
+<!-- -------------------- 首頁 -------------------- -->
+<section id="home" class="section" style="display:block;">
+  <div class="card">
+    <h2>今日讀書時間</h2>
+    <p id="todayTime">0 小時</p>
+  </div>
+
+  <div class="card">
+    <h2>升級進度</h2>
+    <div class="level-bar"><div id="levelProgress" class="level-progress"></div></div>
+    <p id="levelText">Lv.1 冒險新手</p>
+  </div>
+
+  <div class="chick-container" id="chickContainer">
+    <svg class="chick-svg" viewBox="0 0 200 200">
+      <circle cx="100" cy="120" r="50" fill="#FFEB3B"/>
+      <circle cx="80" cy="100" r="10" fill="#000"/>
+      <circle cx="120" cy="100" r="10" fill="#000"/>
+      <polygon points="100,115 90,130 110,130" fill="#FF9800"/>
+      <polygon points="60,160 70,140 80,160" fill="#FF9800"/>
+      <polygon points="140,160 130,140 120,160" fill="#FF9800"/>
+    </svg>
+  </div>
+</section>
+
+<!-- -------------------- 番茄鐘 -------------------- -->
+<section id="pomodoro" class="section">
+  <h2>🍅 番茄鐘</h2>
+  <div style="font-size:48px; margin:20px;" id="timerDisplay">25:00</div>
+  <button class="btn" onclick="startTimer()">▶ 開始</button>
+  <button class="btn" onclick="resetTimer()">🔄 重設</button>
+</section>
+
 <!-- -------------------- 小測驗 -------------------- -->
-<section id="quiz" class="section" style="display:none;">
+<section id="quiz" class="section">
   <h2>🎮 RPG 小雞小測驗</h2>
   <div class="card" style="max-width:400px; margin:auto;">
     <p id="quizQuestion">Loading...</p>
@@ -9,7 +120,7 @@
 </section>
 
 <!-- -------------------- AI 小老師 -------------------- -->
-<section id="ai" class="section" style="display:none;">
+<section id="ai" class="section">
   <h2>✨ AI 小老師</h2>
   <div class="card" style="max-width:500px; margin:auto;">
     <div class="chat-log" id="chatLog" style="height:220px; overflow-y:auto; background:#f6f6f6; padding:10px; border-radius:10px; margin-bottom:12px;"></div>
@@ -19,20 +130,19 @@
 </section>
 
 <!-- -------------------- Chart.js 讀書數據 -------------------- -->
-<section id="chart" class="section" style="display:none;">
+<section id="chart" class="section">
   <h2>📊 我的讀書紀錄</h2>
   <canvas id="studyChart" width="350"></canvas>
 </section>
 
-<!-- -------------------- JS 功能 -------------------- -->
 <script>
-/* ==================== 頁面切換 ==================== */
+/* ========== 頁面切換 ========== */
 function showSection(id){
   document.querySelectorAll(".section").forEach(s=>s.style.display="none");
   document.getElementById(id).style.display="block";
 }
 
-/* ==================== 深色模式 ==================== */
+/* ========== 深色模式 ========== */
 let darkMode=false;
 function toggleMode(){
   darkMode=!darkMode;
@@ -45,7 +155,7 @@ function toggleMode(){
   }
 }
 
-/* ==================== 番茄鐘 ==================== */
+/* ========== 番茄鐘 ========== */
 let timer=25*60;
 let timerInterval;
 function updateTimerDisplay(){
@@ -61,7 +171,8 @@ function startTimer(){
       addEXP(10);
       playDing();
       chickLevelUp();
-      alert("番茄鐘完成！+10 EXP");
+      addStudyTime(1);
+      alert("番茄鐘完成！+10 EXP + 1小時讀書");
       return;
     }
     timer--;
@@ -71,13 +182,13 @@ function startTimer(){
 function resetTimer(){clearInterval(timerInterval); timer=25*60; updateTimerDisplay();}
 updateTimerDisplay();
 
-/* ==================== 番茄鐘音效 ==================== */
+/* ========== 音效 ========== */
 function playDing(){
   const audio=new Audio("https://freesound.org/data/previews/341/341695_62467-lq.mp3");
   audio.play();
 }
 
-/* ==================== EXP / 升級系統 ==================== */
+/* ========== EXP / 升級 ========== */
 let exp=localStorage.getItem("exp")?parseInt(localStorage.getItem("exp")):0;
 let level=localStorage.getItem("level")?parseInt(localStorage.getItem("level")):1;
 function addEXP(amount){
@@ -103,19 +214,18 @@ function updateLevelUI(){
 }
 updateLevelUI();
 
-/* ==================== 小雞升級動畫 ==================== */
+/* ========== 小雞升級動畫 ========== */
 function chickLevelUp(){
   const chick=document.getElementById("chickContainer");
   chick.classList.add("chick-glow");
   setTimeout(()=>{chick.classList.remove("chick-glow");},1000);
-  // SVG 進化 Lv1-Lv5
   const svg=chick.querySelector(".chick-svg");
   if(level==2){svg.innerHTML='<circle cx="100" cy="120" r="50" fill="#FFEB3B"/><circle cx="80" cy="100" r="10"/><circle cx="120" cy="100" r="10"/><polygon points="100,115 90,130 110,130" fill="#FF9800"/><polygon points="60,160 70,140 80,160" fill="#FF9800"/><polygon points="140,160 130,140 120,160" fill="#FF9800"/><polygon points="100,60 90,50 110,50" fill="#AAFF00"/>';}
   else if(level==3){svg.innerHTML='<circle cx="100" cy="120" r="50" fill="#FFEB3B"/><circle cx="80" cy="100" r="10"/><circle cx="120" cy="100" r="10"/><polygon points="100,115 90,130 110,130" fill="#FF9800"/><polygon points="60,160 70,140 80,160" fill="#FF9800"/><polygon points="140,160 130,140 120,160" fill="#FF9800"/><polygon points="100,50 85,30 115,30" fill="#FFD700"/>';}
   else if(level>=4){svg.innerHTML='<circle cx="100" cy="120" r="50" fill="#FFEB3B"/><circle cx="80" cy="100" r="10"/><circle cx="120" cy="100" r="10"/><polygon points="100,115 90,130 110,130" fill="#FF9800"/><polygon points="60,160 70,140 80,160" fill="#FF9800"/><polygon points="140,160 130,140 120,160" fill="#FF9800"/><polygon points="100,40 80,20 120,20" fill="#FFD700"/><polygon points="90,150 110,150 100,180" fill="#00BFFF"/>';}
 }
 
-/* ==================== Chart.js 讀書紀錄 ==================== */
+/* ========== Chart.js 讀書紀錄 ========== */
 const studyData=localStorage.getItem("studyData")?JSON.parse(localStorage.getItem("studyData")):[0,0,0,0,0,0,0];
 const studyChart=new Chart(document.getElementById("studyChart"),{
   type:'line',
@@ -142,7 +252,7 @@ function addStudyTime(hours){
 }
 addStudyTime(0);
 
-/* ==================== AI 小老師 ==================== */
+/* ========== AI 小老師 ========== */
 function aiReply(){
   const log=document.getElementById("chatLog");
   const input=document.getElementById("chatInput").value;
@@ -154,7 +264,7 @@ function aiReply(){
   log.scrollTop=log.scrollHeight;
 }
 
-/* ==================== 小測驗 ==================== */
+/* ========== 小測驗 ========== */
 const quizQuestions=[
   {q:"今天你學習的心情？", a:["專注","累","精神"]},
   {q:"你喜歡哪種小雞帽子？", a:["皇冠","法師帽","冒險帽"]},
@@ -182,5 +292,7 @@ function nextQuiz(){
   else{document.getElementById("quizResult").textContent="小雞性格已生成 🐥";}
 }
 showQuiz();
-
 </script>
+
+</body>
+</html>
