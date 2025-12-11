@@ -22,7 +22,6 @@ body { margin:0; padding:0; font-family:"Microsoft JhengHei",sans-serif;
 .chick-container{ width:200px; margin:15px auto; transition: all 0.5s; }
 .chick-svg{width:100%;height:auto;}
 .chick-glow{filter: drop-shadow(0 0 20px yellow); transform: scale(1.2);}
-.chat-input{width:70%; padding:8px; border-radius:10px; border:1px solid #ccc; margin-right:5px;}
 .section{display:none;}
 input[type=text]{padding:8px; border-radius:10px; border:1px solid #ccc; width:150px;}
 </style>
@@ -68,6 +67,17 @@ input[type=text]{padding:8px; border-radius:10px; border:1px solid #ccc; width:1
       <polygon points="60,160 70,140 80,160" fill="#FF9800"/>
       <polygon points="140,160 130,140 120,160" fill="#FF9800"/>
     </svg>
+  </div>
+
+  <!-- 分享碼 -->
+  <div class="card">
+    <button class="btn" onclick="generateShareCode()">📝 生成分享碼</button>
+    <p id="shareCodeDisplay"></p>
+  </div>
+  <div class="card">
+    <input type="text" id="inputShareCode" placeholder="輸入分享碼查看分數">
+    <button class="btn" onclick="viewSharedScore()">🔍 查看</button>
+    <p id="sharedScoreDisplay"></p>
   </div>
 </section>
 
@@ -147,8 +157,28 @@ function savePlayerName(){
 /* =================== 儲存玩家 =================== */
 function saveAllPlayers(){
   const storedPlayers = JSON.parse(localStorage.getItem("allPlayers")||"{}");
-  storedPlayers[player.name] = { ...player, achievements, studyData };
+  storedPlayers[player.name] = { ...player, achievements, studyData, shareCode:player.shareCode||"" };
   localStorage.setItem("allPlayers", JSON.stringify(storedPlayers));
+}
+
+/* =================== 分享碼 =================== */
+function generateShareCode(){
+  const code = Math.random().toString(36).substring(2,8).toUpperCase();
+  player.shareCode = code;
+  saveAllPlayers();
+  document.getElementById("shareCodeDisplay").textContent = "你的分享碼："+code;
+}
+
+function viewSharedScore(){
+  const code = document.getElementById("inputShareCode").value.trim().toUpperCase();
+  if(!code){ alert("請輸入分享碼！"); return; }
+  const storedPlayers = JSON.parse(localStorage.getItem("allPlayers")||"{}");
+  const found = Object.values(storedPlayers).find(p=>p.shareCode===code);
+  if(found){
+    document.getElementById("sharedScoreDisplay").textContent = found.name + " 的分數："+found.score;
+  } else {
+    document.getElementById("sharedScoreDisplay").textContent = "找不到對應玩家";
+  }
 }
 
 /* =================== 番茄鐘 =================== */
