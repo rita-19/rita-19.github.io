@@ -92,9 +92,22 @@ function showSection(id){
 }
 let darkMode=false;
 function toggleMode(){
-  darkMode=!darkMode;
-  document.body.style.background=darkMode?"linear-gradient(#1c1c1c,#333)":"linear-gradient(#ffe6f7,#d6e8ff)";
-  document.body.style.color=darkMode?"#fff":"#000";
+  darkMode = !darkMode;
+  if(darkMode){
+    document.body.style.background = "linear-gradient(#1c1c1c,#333)";
+    document.body.style.color = "#fff";
+    document.querySelectorAll(".card").forEach(c=>{
+      c.style.background = "#222";
+      c.style.color = "#fff";
+    });
+  } else {
+    document.body.style.background = "linear-gradient(#ffe6f7,#d6e8ff)";
+    document.body.style.color = "#000";
+    document.querySelectorAll(".card").forEach(c=>{
+      c.style.background = "white";
+      c.style.color = "#000";
+    });
+  }
 }
 
 /* -------- 玩家資料 -------- */
