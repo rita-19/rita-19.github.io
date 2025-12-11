@@ -2,21 +2,29 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<title>Study Program</title>
+<title>Study Galaxy RPG 小雞冒險版</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-body {margin:0;padding:0;font-family:"Microsoft JhengHei",sans-serif;background: linear-gradient(#ffe6f7,#d6e8ff);text-align:center;color:#000;transition:0.5s;}
-.btn{padding:10px 15px;margin:5px;border:none;border-radius:12px;background:#ffb8d1;font-size:16px;cursor:pointer;transition:0.3s;}
-.btn:hover{background:#ff95be;transform:scale(1.05);}
-.card{display:inline-block;background:white;padding:20px;margin:15px;border-radius:20px;box-shadow:0 4px 12px rgba(0,0,0,0.15);width:280px;transition:0.3s;}
+body { margin:0; padding:0; font-family:"Microsoft JhengHei",sans-serif;
+  background: linear-gradient(#ffe6f7,#d6e8ff); text-align:center;
+  transition: all 0.5s; color:#000; }
+.btn{ padding:10px 15px; margin:5px; border:none; border-radius:12px;
+  background:#ffb8d1; font-size:16px; cursor:pointer; transition:0.3s; }
+.btn:hover{background:#ff95be; transform:scale(1.05);}
+.card{ display:inline-block; background:white; padding:20px; margin:15px;
+  border-radius:20px; box-shadow:0 4px 12px rgba(0,0,0,0.15);
+  width:280px; transition:0.3s; }
 .card:hover{transform:scale(1.05);}
-.level-bar{width:80%; height:20px;background:#fff;border-radius:10px;margin:10px auto;overflow:hidden;box-shadow: inset 2px 2px 5px rgba(0,0,0,0.1);}
-.level-progress{height:100%;background: linear-gradient(90deg,#ff95be,#ffb8d1);width:0%;transition: width 0.5s;}
-.chick-container{width:200px;margin:15px auto;transition: all 0.5s;}
+.level-bar{ width:80%; height:20px; background:#fff; border-radius:10px;
+  margin:10px auto; overflow:hidden; box-shadow: inset 2px 2px 5px rgba(0,0,0,0.1);}
+.level-progress{ height:100%; background: linear-gradient(90deg,#ff95be,#ffb8d1);
+  width:0%; transition: width 0.5s; }
+.chick-container{ width:200px; margin:15px auto; transition: all 0.5s; }
 .chick-svg{width:100%;height:auto;}
 .chick-glow{filter: drop-shadow(0 0 20px yellow); transform: scale(1.2);}
-.section{display:none;}
 .chat-input{width:70%; padding:8px; border-radius:10px; border:1px solid #ccc; margin-right:5px;}
-input{padding:8px;border-radius:10px;border:1px solid #ccc;margin:5px;}
+.section{display:none;}
+input[type=text]{padding:8px; border-radius:10px; border:1px solid #ccc; width:150px;}
 </style>
 </head>
 <body>
@@ -24,12 +32,17 @@ input{padding:8px;border-radius:10px;border:1px solid #ccc;margin:5px;}
 <h1>🌟 Study Galaxy – RPG 小雞冒險版</h1>
 <p>小雞助教陪你學習冒險！</p>
 
+<div class="card">
+  <input type="text" id="playerName" placeholder="輸入名稱">
+  <button class="btn" onclick="savePlayerName()">設定名稱</button>
+</div>
+
 <div>
   <button class="btn" onclick="showSection('home')">🏠 首頁</button>
   <button class="btn" onclick="showSection('pomodoro')">🍅 番茄鐘</button>
-  <button class="btn" onclick="showSection('quiz')">🎮 小測驗</button>
-  <button class="btn" onclick="showSection('rank')">🏆 排行榜</button>
-  <button class="btn" onclick="showSection('achieve')">🎖 成就</button>
+  <button class="btn" onclick="showSection('achievements')">🏆 成就</button>
+  <button class="btn" onclick="showSection('chart')">📊 讀書數據</button>
+  <button class="btn" onclick="showSection('leaderboard')">🥇 排行榜</button>
   <button class="btn" onclick="toggleMode()">🌙 深色模式</button>
 </div>
 
@@ -44,10 +57,17 @@ input{padding:8px;border-radius:10px;border:1px solid #ccc;margin:5px;}
   <div class="card">
     <h2>升級進度</h2>
     <div class="level-bar"><div id="levelProgress" class="level-progress"></div></div>
-    <p id="levelText">Lv.1 冒險新手</p>
+    <p id="levelText">Lv.1 冒險者</p>
   </div>
   <div class="chick-container" id="chickContainer">
-    <svg class="chick-svg" viewBox="0 0 200 200"></svg>
+    <svg class="chick-svg" viewBox="0 0 200 200">
+      <circle cx="100" cy="120" r="50" fill="#FFEB3B"/>
+      <circle cx="80" cy="100" r="10" fill="#000"/>
+      <circle cx="120" cy="100" r="10" fill="#000"/>
+      <polygon points="100,115 90,130 110,130" fill="#FF9800"/>
+      <polygon points="60,160 70,140 80,160" fill="#FF9800"/>
+      <polygon points="140,160 130,140 120,160" fill="#FF9800"/>
+    </svg>
   </div>
 </section>
 
@@ -59,212 +79,83 @@ input{padding:8px;border-radius:10px;border:1px solid #ccc;margin:5px;}
   <button class="btn" onclick="resetTimer()">🔄 重設</button>
 </section>
 
-<!-- 小測驗 -->
-<section id="quiz" class="section">
-  <h2>🎮 RPG 小雞小測驗</h2>
-  <div class="card" style="max-width:400px; margin:auto;">
-    <p id="quizQuestion">Loading...</p>
-    <div id="quizOptions"></div>
-    <h3 id="quizResult" style="margin-top:20px;"></h3>
-  </div>
+<!-- 成就 -->
+<section id="achievements" class="section">
+  <h2>🏆 成就</h2>
+  <div id="achievementsList" class="card"></div>
+</section>
+
+<!-- Chart.js 讀書數據 -->
+<section id="chart" class="section">
+  <h2>📊 我的讀書紀錄</h2>
+  <canvas id="studyChart" width="350"></canvas>
 </section>
 
 <!-- 排行榜 -->
-<section id="rank" class="section">
-  <h2>🏆 本地排行榜</h2>
-  <div class="card" id="leaderboardCard"></div>
-  <button class="btn" onclick="generateShareCode()">生成分享碼</button>
-  <input id="importCode" placeholder="輸入分享碼導入分數">
-  <button class="btn" onclick="importShareCode()">導入分數</button>
-</section>
-
-<!-- 成就 -->
-<section id="achieve" class="section">
-  <h2>🎖 成就系統</h2>
-  <div class="card" id="achieveCard"></div>
+<section id="leaderboard" class="section">
+  <h2>🥇 排行榜</h2>
+  <div id="leaderboardList" class="card"></div>
 </section>
 
 <script>
-/* -------- 切換區塊 & 深色模式 -------- */
+/* =================== 全域變數 =================== */
+let darkMode=false;
+let timer=25*60, timerInterval;
+let player={name:"", score:0, level:1, exp:0};
+let achievements=[], studyData=[0,0,0,0,0,0,0];
+let maxLevel=10;
+
+/* =================== 頁面切換 =================== */
 function showSection(id){
   document.querySelectorAll(".section").forEach(s=>s.style.display="none");
   document.getElementById(id).style.display="block";
 }
-let darkMode=false;
+
+/* =================== 深色模式 =================== */
 function toggleMode(){
-  darkMode = !darkMode;
+  darkMode=!darkMode;
   if(darkMode){
-    document.body.style.background = "linear-gradient(#1c1c1c,#333)";
-    document.body.style.color = "#fff";
-    document.querySelectorAll(".card").forEach(c=>{
-      c.style.background = "#222";
-      c.style.color = "#fff";
-    });
-  } else {
-    document.body.style.background = "linear-gradient(#ffe6f7,#d6e8ff)";
-    document.body.style.color = "#000";
-    document.querySelectorAll(".card").forEach(c=>{
-      c.style.background = "white";
-      c.style.color = "#000";
-    });
+    document.body.style.background="linear-gradient(#1c1c1c,#333)";
+    document.body.style.color="#fff";
+  }else{
+    document.body.style.background="linear-gradient(#ffe6f7,#d6e8ff)";
+    document.body.style.color="#000";
   }
 }
 
-/* -------- 玩家資料 -------- */
-let player=JSON.parse(localStorage.getItem("player"))||{level:1,exp:0,score:0,achieve:[],todayTime:0};
-let achievements=[
-  {id:1,name:"首次升級",desc:"升到 Lv.2",done:false},
-  {id:2,name:"小雞大師",desc:"升到 Lv.5",done:false},
-  {id:3,name:"讀書達人",desc:"今日讀書 >=1小時",done:false}
-];
+/* =================== 玩家名稱 =================== */
+function savePlayerName(){
+  const nameInput = document.getElementById("playerName").value.trim();
+  if(!nameInput){ alert("請輸入名稱！"); return; }
 
-function savePlayer(){localStorage.setItem("player",JSON.stringify(player));}
-function addEXP(amount){
-  player.exp+=amount;
-  player.score+=amount;
-  checkLevelUp();
-  savePlayer();
+  const storedPlayers = JSON.parse(localStorage.getItem("allPlayers")||"{}");
+  if(storedPlayers[nameInput]){
+    player = storedPlayers[nameInput];
+    achievements = player.achievements||[];
+    studyData = player.studyData||[0,0,0,0,0,0,0];
+    alert("歡迎回來，"+nameInput+"！紀錄已載入。");
+  } else {
+    player = { name: nameInput, score:0, level:1, exp:0 };
+    achievements = [];
+    studyData = [0,0,0,0,0,0,0];
+    alert("歡迎新玩家 "+nameInput+"！已建立新紀錄。");
+  }
+  saveAllPlayers();
   updateUI();
 }
-function checkLevelUp(){
-  let needed=player.level*50;
-  while(player.exp>=needed){
-    player.exp-=needed;
-    player.level++;
-    playAudio('levelup');
-    checkAchievements();
-    chickLevelUp();
-    needed=player.level*50;
-  }
-}
-function updateUI(){
-  let percent=(player.exp/(player.level*50))*100;
-  document.getElementById("levelProgress").style.width=percent+"%";
-  document.getElementById("levelText").textContent="Lv."+player.level+" 冒險者";
-  document.getElementById("todayTime").textContent=player.todayTime+" 小時";
-  updateLeaderboard();
-  updateAchievements();
-  renderChick();
-}
-updateUI();
 
-/* -------- 小雞 10 階進化動畫 -------- */
-function renderChick(){
-  const svg=document.querySelector(".chick-svg");
-  let lvl=player.level;
-  let fill="#FFEB3B";
-  let extra="";
-  if(lvl>=2 && lvl<4) extra='<polygon points="100,60 90,50 110,50" fill="#AAFF00"/>';
-  if(lvl>=4 && lvl<6) extra='<polygon points="100,50 85,30 115,30" fill="#FFD700"/>';
-  if(lvl>=6 && lvl<8) extra='<polygon points="100,40 80,20 120,20" fill="#FFD700"/>';
-  if(lvl>=8 && lvl<10) extra='<polygon points="90,150 110,150 100,180" fill="#00BFFF"/>';
-  if(lvl>=10) fill="#FFD700";
-  svg.innerHTML=`
-    <circle cx="100" cy="120" r="50" fill="${fill}"/>
-    <circle cx="80" cy="100" r="10"/>
-    <circle cx="120" cy="100" r="10"/>
-    <polygon points="100,115 90,130 110,130" fill="#FF9800"/>
-    <polygon points="60,160 70,140 80,160" fill="#FF9800"/>
-    <polygon points="140,160 130,140 120,160" fill="#FF9800"/>
-    ${extra}
-  `;
-}
-function chickLevelUp(){
-  const chick=document.getElementById("chickContainer");
-  chick.classList.add("chick-glow");
-  setTimeout(()=>{chick.classList.remove("chick-glow");},1000);
+/* =================== 儲存玩家 =================== */
+function saveAllPlayers(){
+  const storedPlayers = JSON.parse(localStorage.getItem("allPlayers")||"{}");
+  storedPlayers[player.name] = { ...player, achievements, studyData };
+  localStorage.setItem("allPlayers", JSON.stringify(storedPlayers));
 }
 
-/* -------- 成就系統 -------- */
-function checkAchievements(){
-  achievements.forEach(a=>{
-    if(!a.done){
-      if(a.id===1 && player.level>=2)a.done=true;
-      if(a.id===2 && player.level>=5)a.done=true;
-      if(a.id===3 && player.todayTime>=1)a.done=true;
-      if(a.done) playAudio('achieve');
-    }
-  });
-}
-function updateAchievements(){
-  let card=document.getElementById("achieveCard");
-  card.innerHTML="";
-  achievements.forEach(a=>{
-    let p=document.createElement("p");
-    p.textContent=a.name+" - "+a.desc+" ["+(a.done?"✅":"❌")+"]";
-    card.appendChild(p);
-  });
-}
-
-/* -------- 小測驗 -------- */
-const quizQuestions=[
-  {q:"今天你學習的心情？", a:["專注","累","精神"]},
-  {q:"你喜歡哪種小雞帽子？", a:["皇冠","法師帽","冒險帽"]},
-  {q:"如果遇到困難，你會？", a:["努力解決","休息","找朋友"]},
-  {q:"學習環境你偏好？", a:["安靜","音樂","熱鬧"]},
-  {q:"你覺得自己像哪隻小雞？", a:["呆萌","勇敢","調皮"]}
-];
-let quizIndex=0;
-function showQuiz(){
-  const q=quizQuestions[quizIndex];
-  document.getElementById("quizQuestion").textContent=q.q;
-  const options=document.getElementById("quizOptions");
-  options.innerHTML="";
-  q.a.forEach(opt=>{
-    const b=document.createElement("button");
-    b.className="btn";
-    b.textContent=opt;
-    b.onclick=nextQuiz;
-    options.appendChild(b);
-  });
-}
-function nextQuiz(){
-  quizIndex++;
-  if(quizIndex<quizQuestions.length){showQuiz();}
-  else{document.getElementById("quizResult").textContent="小雞性格已生成 🐥";}
-}
-showQuiz();
-
-/* -------- 本地排行榜 + 匿名分享碼 -------- */
-function updateLeaderboard(){
-  let card=document.getElementById("leaderboardCard");
-  card.innerHTML="玩家分數: "+player.score+" | 等級: "+player.level;
-}
-function generateShareCode(){
-  let data=JSON.stringify(player);
-  let code=btoa(data);
-  prompt("分享碼已生成，複製給朋友：", code);
-}
-function importShareCode(){
-  let code=document.getElementById("importCode").value.trim();
-  if(!code)return;
-  try{
-    let data=JSON.parse(atob(code));
-    if(data.score>player.score) player.score=data.score;
-    if(data.level>player.level) player.level=data.level;
-    if(data.todayTime>player.todayTime) player.todayTime=data.todayTime;
-    savePlayer();
-    updateUI();
-    alert("分數已導入！");
-  }catch(e){alert("分享碼無效！");}
-}
-
-/* -------- 音效 -------- */
-function playAudio(type){
-  let url="";
-  if(type==='levelup') url="https://freesound.org/data/previews/341/341695_62467-lq.mp3";
-  if(type==='achieve') url="https://freesound.org/data/previews/331/331912_3248244-lq.mp3";
-  if(type==='pomodoro') url="https://freesound.org/data/previews/331/331906_3248244-lq.mp3";
-  let audio=new Audio(url);
-  audio.play();
-}
-
-/* -------- 番茄鐘 -------- */
-let timer=25*60;
-let timerInterval;
+/* =================== 番茄鐘 =================== */
 function updateTimerDisplay(){
   let m=Math.floor(timer/60), s=timer%60;
-  document.getElementById("timerDisplay").textContent=(m<10?"0":"")+m+":"+(s<10?"0":"")+s;
+  document.getElementById("timerDisplay").textContent=
+    (m<10?"0":"")+m+":"+(s<10?"0":"")+s;
 }
 function startTimer(){
   clearInterval(timerInterval);
@@ -272,22 +163,119 @@ function startTimer(){
     if(timer<=0){
       clearInterval(timerInterval);
       addEXP(10);
-      player.todayTime+=1;
-      chickLevelUp();
-      playAudio('pomodoro');
-      alert("番茄鐘完成！+10 EXP + 1小時讀書");
-      updateUI();
-      timer=25*60;
-      updateTimerDisplay();
+      addStudyTime(1);
+      playSound("ding");
+      alert("番茄鐘完成！+10 EXP +1小時讀書");
       return;
     }
-    timer--;
-    updateTimerDisplay();
+    timer--; updateTimerDisplay();
   },1000);
 }
 function resetTimer(){clearInterval(timerInterval); timer=25*60; updateTimerDisplay();}
 updateTimerDisplay();
 
+/* =================== 音效 =================== */
+function playSound(type){
+  let url="";
+  if(type==="ding") url="https://freesound.org/data/previews/341/341695_62467-lq.mp3";
+  else if(type==="level") url="https://freesound.org/data/previews/170/170664_2437358-lq.mp3";
+  else if(type==="achievement") url="https://freesound.org/data/previews/399/399447_5121236-lq.mp3";
+  if(url){ const audio=new Audio(url); audio.play(); }
+}
+
+/* =================== EXP / 等級 =================== */
+function addEXP(amount){
+  player.exp+=amount; player.score+=amount;
+  checkLevelUp(); saveAllPlayers(); updateUI();
+}
+function checkLevelUp(){
+  let needed=player.level*50;
+  while(player.exp>=needed && player.level<maxLevel){
+    player.exp-=needed; player.level++;
+    chickLevelUp(); playSound("level");
+    needed=player.level*50;
+    checkAchievements();
+  }
+  updateLevelUI();
+}
+function updateLevelUI(){
+  let percent=(player.exp/(player.level*50))*100;
+  document.getElementById("levelProgress").style.width=percent+"%";
+  document.getElementById("levelText").textContent="Lv."+player.level+" 冒險者";
+}
+
+/* =================== 小雞進化 10 階 =================== */
+function chickLevelUp(){
+  const chick=document.getElementById("chickContainer");
+  chick.classList.add("chick-glow");
+  setTimeout(()=>{chick.classList.remove("chick-glow");},1000);
+  const svg=chick.querySelector(".chick-svg");
+  let colors=["#FFEB3B","#FFD700","#FF9800","#00BFFF","#AAFF00","#FF69B4","#FFA500","#ADFF2F","#00FA9A","#FF4500"];
+  let size=50 + player.level*2;
+  svg.innerHTML='<circle cx="100" cy="120" r="'+size+'" fill="'+colors[player.level-1]+'"/>';
+}
+
+/* =================== 成就系統 =================== */
+function checkAchievements(){
+  const achDiv=document.getElementById("achievementsList");
+  let newAch=false;
+  const achMap = [
+    {name:"第一次升級", condition:()=>player.level>=2},
+    {name:"小雞勇者", condition:()=>player.level>=5},
+    {name:"讀書達人", condition:()=>studyData.reduce((a,b)=>a+b,0)>=5},
+    {name:"超級勇者", condition:()=>player.level>=10}
+  ];
+  achDiv.innerHTML="";
+  achMap.forEach(a=>{
+    if(a.condition() && !achievements.includes(a.name)){
+      achievements.push(a.name); playSound("achievement"); newAch=true;
+    }
+    if(achievements.includes(a.name)){
+      achDiv.innerHTML+="<p>🏆 "+a.name+"</p>";
+    }
+  });
+  if(newAch) saveAllPlayers();
+}
+
+/* =================== 讀書紀錄 =================== */
+function addStudyTime(hours){
+  const day=new Date().getDay();
+  const index=(day==0?6:day-1);
+  studyData[index]+=hours;
+  player.studyData = studyData;
+  saveAllPlayers();
+  document.getElementById("todayTime").textContent=studyData[index]+" 小時";
+  updateChart();
+  checkAchievements();
+}
+const studyChart=new Chart(document.getElementById("studyChart"),{
+  type:'line',
+  data:{labels:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], datasets:[{label:"讀書時間(小時)",data:studyData,borderColor:"#ff8bb5",backgroundColor:"#ffbcd9",tension:0.3}]},
+  options:{scales:{y:{beginAtZero:true}}}
+});
+function updateChart(){ studyChart.data.datasets[0].data=studyData; studyChart.update(); }
+
+/* =================== 排行榜 =================== */
+function updateLeaderboard(){
+  const lbDiv=document.getElementById("leaderboardList");
+  const storedPlayers=JSON.parse(localStorage.getItem("allPlayers")||"{}");
+  const sorted = Object.values(storedPlayers).sort((a,b)=>b.score-a.score);
+  lbDiv.innerHTML="";
+  sorted.forEach((p,i)=>{
+    lbDiv.innerHTML+="<p>"+(i+1)+". "+p.name+" - "+p.score+"分</p>";
+  });
+}
+
+/* =================== 更新 UI =================== */
+function updateUI(){
+  updateLevelUI();
+  document.getElementById("todayTime").textContent=studyData[new Date().getDay()?new Date().getDay()-1:6]+" 小時";
+  updateLeaderboard();
+  updateChart();
+  checkAchievements();
+}
+updateUI();
 </script>
+
 </body>
 </html>
