@@ -2,266 +2,212 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<title>Study Program</title>
+<title>Study Program｜王者版</title>
 
 <!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-/* ================= 全域 ================= */
+/* ================= 全域樣式 ================= */
 body{
-  margin:0; padding:0;
+  margin:0;
   font-family:"Microsoft JhengHei",sans-serif;
   background: linear-gradient(#ffe6f7,#d6e8ff);
   text-align:center;
-  transition:.4s;
+  transition:.3s;
 }
-.dark-mode{
-  background:linear-gradient(#1c1c1c,#333);
+.dark body{
+  background: linear-gradient(#1c1c1c,#333);
   color:#fff;
 }
 .btn{
-  padding:10px 15px;
-  margin:5px;
+  padding:10px 16px;
   border:none;
-  border-radius:12px;
+  border-radius:14px;
   background:#ffb8d1;
   cursor:pointer;
+  margin:5px;
 }
-.dark-mode .btn{background:#555;color:#fff;}
 .card{
   background:#fff;
-  padding:20px;
-  margin:15px auto;
   border-radius:20px;
-  width:300px;
-  box-shadow:0 4px 12px rgba(0,0,0,.2);
+  padding:20px;
+  margin:15px;
+  display:inline-block;
+  width:280px;
 }
-.dark-mode .card{background:#222;color:#fff;}
 .section{display:none}
 
-/* ================= 小雞 ================= */
-.chick-container{width:200px;margin:20px auto;}
+/* 小雞漂浮 */
 @keyframes float{
   0%{transform:translateY(0)}
   50%{transform:translateY(-10px)}
   100%{transform:translateY(0)}
 }
-#home .chick-container{animation:float 3s ease-in-out infinite}
-
-/* ================= 進度條 ================= */
-.level-bar{
-  width:80%;height:18px;background:#ddd;
-  border-radius:10px;margin:auto;overflow:hidden;
-}
-.level-progress{
-  height:100%;width:0%;
-  background:linear-gradient(90deg,#ff95be,#ffb8d1);
+.chick-container{
+  width:200px;
+  margin:auto;
+  animation:float 3s infinite;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🌟 Study Program</h1>
-<p>小雞助教陪你學習冒險</p>
+<h1>🐥 Study Program</h1>
 
 <!-- 導覽 -->
 <div>
-  <button class="btn" onclick="showSection('home')">🏠 首頁</button>
-  <button class="btn" onclick="showSection('pomodoro')">🍅 番茄鐘</button>
-  <button class="btn" onclick="showSection('quiz')">🎮 測驗</button>
-  <button class="btn" onclick="showSection('chart')">📊 紀錄</button>
-  <button class="btn" onclick="showSection('leaderboard')">🏆 排行</button>
-  <button class="btn" onclick="toggleMode()">🌙 深色</button>
+  <button class="btn" onclick="UI.show('home')">首頁</button>
+  <button class="btn" onclick="UI.show('pomodoro')">番茄鐘</button>
+  <button class="btn" onclick="UI.show('quiz')">小測驗</button>
+  <button class="btn" onclick="UI.show('chart')">數據</button>
+  <button class="btn" onclick="UI.show('leaderboard')">排行榜</button>
+  <button class="btn" onclick="UI.toggleDark()">深色</button>
 </div>
-
-<hr width="80%">
 
 <!-- ================= 首頁 ================= -->
 <section id="home" class="section" style="display:block">
+  <div class="chick-container">🐥</div>
+
   <div class="card">
-    <h3>🐥 小雞</h3>
-    <div class="chick-container">
-      <svg viewBox="0 0 200 200">
-        <circle cx="100" cy="120" r="50" fill="#FFEB3B"/>
-        <circle cx="80" cy="100" r="8"/>
-        <circle cx="120" cy="100" r="8"/>
-        <polygon points="100,115 90,130 110,130" fill="#FF9800"/>
-      </svg>
-    </div>
-    <p id="chickPersonalityText">尚未測驗</p>
+    <h3>等級</h3>
+    <p id="levelText">Lv.1</p>
   </div>
 
   <div class="card">
-    <h3>⬆️ 等級</h3>
-    <div class="level-bar">
-      <div id="levelProgress" class="level-progress"></div>
-    </div>
-    <p id="levelText">Lv.1 冒險新手</p>
-    <p>今日讀書：<span id="todayTime">0</span> 小時</p>
+    <h3>今日讀書</h3>
+    <p id="todayTime">0 小時</p>
+  </div>
+
+  <div class="card">
+    <h3>小雞性格</h3>
+    <p id="chickPersonalityText">尚未測驗</p>
   </div>
 </section>
 
 <!-- ================= 番茄鐘 ================= -->
 <section id="pomodoro" class="section">
-  <div class="card">
-    <h2>🍅 番茄鐘</h2>
-    <div id="timerDisplay" style="font-size:48px">25:00</div>
-    <button class="btn" onclick="startTimer()">開始</button>
-    <button class="btn" onclick="resetTimer()">重設</button>
-  </div>
+  <h2>🍅 番茄鐘</h2>
+  <div id="timer">25:00</div>
+  <button class="btn" onclick="Pomodoro.start()">開始</button>
 </section>
 
 <!-- ================= 小測驗 ================= -->
 <section id="quiz" class="section">
   <div class="card">
-    <h2>🎮 小雞測驗</h2>
-    <p id="quizQuestion"></p>
-    <div id="quizOptions"></div>
-    <h3 id="quizResult"></h3>
-    <button class="btn" onclick="resetQuiz()">重新測驗</button>
+    <p id="quizQ">題目</p>
+    <div id="quizOpt"></div>
   </div>
 </section>
 
 <!-- ================= 圖表 ================= -->
 <section id="chart" class="section">
-  <div class="card">
-    <h2>📊 讀書紀錄</h2>
-    <canvas id="studyChart" width="280"></canvas>
-  </div>
+  <canvas id="studyChart" width="300"></canvas>
 </section>
 
 <!-- ================= 排行榜 ================= -->
 <section id="leaderboard" class="section">
   <div class="card">
-    <h2>🏆 排行榜</h2>
-    <input id="playerName" placeholder="輸入名稱">
-    <button class="btn" onclick="login()">登入</button>
-    <p>分享碼：<span id="shareCode">-</span></p>
-    <ul id="leaderboardList"></ul>
+    <input id="playerName" placeholder="名稱">
+    <button class="btn" onclick="Player.login()">登入</button>
+    <ul id="rank"></ul>
   </div>
 </section>
 
 <script>
-/* ========== 基本切換 ========== */
-function showSection(id){
-  document.querySelectorAll(".section").forEach(s=>s.style.display="none");
-  document.getElementById(id).style.display="block";
-}
+/* ================= 狀態管理（核心） ================= */
+const State = {
+  level:1,
+  exp:0,
+  study:[0,0,0,0,0,0,0],
+  chickPersonality:"",
+  currentPlayer:null,
+  players:{},
+  dark:false
+};
 
-/* ========== 深色模式 ========== */
-let dark=false;
-function toggleMode(){
-  dark=!dark;
-  document.body.classList.toggle("dark-mode",dark);
-  chart.update();
-}
+/* ================= UI ================= */
+const UI = {
+  show(id){
+    document.querySelectorAll(".section").forEach(s=>s.style.display="none");
+    document.getElementById(id).style.display="block";
+  },
+  toggleDark(){
+    State.dark=!State.dark;
+    document.body.style.filter = State.dark ? "invert(1)" : "";
+  }
+};
 
-/* ========== 玩家 / 存檔 ========== */
-let players=JSON.parse(localStorage.getItem("players")||"{}");
-let current=null;
+/* ================= 玩家 ================= */
+const Player = {
+  login(){
+    const name=document.getElementById("playerName").value.trim();
+    if(!name) return;
 
-/* ========== 等級 ========== */
-let level=1,exp=0;
-function addEXP(n){
-  exp+=n;
-  if(exp>=level*50){exp=0;level++;}
-  updateLevel();
-}
-function updateLevel(){
-  document.getElementById("levelText").textContent=`Lv.${level}`;
-  document.getElementById("levelProgress").style.width=(exp/(level*50)*100)+"%";
-}
+    State.players[name] ??= {
+      level:1,
+      study:[0,0,0,0,0,0,0],
+      chickPersonality:""
+    };
 
-/* ========== 番茄鐘 ========== */
-let time=1500,interval;
-function updateTimer(){
-  let m=Math.floor(time/60),s=time%60;
-  timerDisplay.textContent=`${m}:${s<10?"0":""}${s}`;
-}
-function startTimer(){
-  clearInterval(interval);
-  interval=setInterval(()=>{
-    time--;
-    if(time<=0){
-      clearInterval(interval);
-      addEXP(10);
-      addStudy(0.5);
-      save();
-    }
-    updateTimer();
-  },1000);
-}
-function resetTimer(){clearInterval(interval);time=1500;updateTimer();}
-updateTimer();
+    State.currentPlayer=name;
+    Object.assign(State, State.players[name]);
+    UI.update();
+  }
+};
 
-/* ========== 圖表 ========== */
-let study=[0,0,0,0,0,0,0];
-const chart=new Chart(studyChart,{
+/* ================= UI 更新 ================= */
+UI.update = ()=>{
+  document.getElementById("levelText").textContent = "Lv."+State.level;
+  document.getElementById("todayTime").textContent = State.study[new Date().getDay()||6]+" 小時";
+  document.getElementById("chickPersonalityText").textContent =
+    State.chickPersonality || "尚未測驗";
+};
+
+/* ================= 番茄鐘 ================= */
+const Pomodoro = {
+  time:1500,
+  start(){
+    setInterval(()=>{
+      Pomodoro.time--;
+      document.getElementById("timer").textContent =
+        Math.floor(Pomodoro.time/60)+":"+String(Pomodoro.time%60).padStart(2,"0");
+    },1000);
+  }
+};
+
+/* ================= 小測驗 ================= */
+const Quiz = {
+  q:[
+    ["今天心情？",["專注","累","精神"]],
+    ["你像哪隻小雞？",["勇敢","呆萌","冷靜"]]
+  ],
+  i:0,
+  show(){
+    const q=Quiz.q[Quiz.i];
+    document.getElementById("quizQ").textContent=q[0];
+    const o=document.getElementById("quizOpt");
+    o.innerHTML="";
+    q[1].forEach(a=>{
+      const b=document.createElement("button");
+      b.textContent=a;
+      b.onclick=()=>{State.chickPersonality=a; UI.update()};
+      o.appendChild(b);
+    });
+  }
+};
+Quiz.show();
+
+/* ================= 圖表 ================= */
+new Chart(document.getElementById("studyChart"),{
   type:"line",
-  data:{labels:["一","二","三","四","五","六","日"],
-  datasets:[{data:study,label:"小時"}]}
+  data:{
+    labels:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
+    datasets:[{data:State.study}]
+  }
 });
-function addStudy(h){
-  let d=(new Date().getDay()+6)%7;
-  study[d]+=h;
-  todayTime.textContent=study[d];
-  chart.update();
-}
-
-/* ========== 測驗 ========== */
-const quiz=[
- {q:"今天心情？",a:["專注","累","精神"]},
- {q:"遇到困難？",a:["努力","休息","找人"]}
-];
-let qi=0,qa=[];
-function showQuiz(){
-  quizQuestion.textContent=quiz[qi].q;
-  quizOptions.innerHTML="";
-  quiz[qi].a.forEach(o=>{
-    let b=document.createElement("button");
-    b.className="btn";b.textContent=o;
-    b.onclick=()=>{qa.push(o);qi++;qi<quiz.length?showQuiz():finishQuiz();}
-    quizOptions.appendChild(b);
-  });
-}
-function finishQuiz(){
-  chickPersonalityText.textContent="勇敢小雞";
-}
-function resetQuiz(){qi=0;qa=[];showQuiz();}
-showQuiz();
-
-/* ========== 登入 / 排行 ========== */
-function login(){
-  const name=playerName.value.trim();
-  if(!name) return;
-  current=name;
-  if(!players[name]) players[name]={level:1,exp:0,study:[0,0,0,0,0,0,0],code:Math.random().toString(36).slice(2,6)};
-  load();
-}
-function save(){
-  if(!current) return;
-  players[current]={level,exp,study,code:players[current].code};
-  localStorage.setItem("players",JSON.stringify(players));
-  updateBoard();
-}
-function load(){
-  let p=players[current];
-  level=p.level;exp=p.exp;study=p.study;
-  shareCode.textContent=p.code;
-  updateLevel();chart.update();
-  updateBoard();
-}
-function updateBoard(){
-  leaderboardList.innerHTML="";
-  Object.entries(players).sort((a,b)=>b[1].level-a[1].level)
-  .forEach(([n,p],i)=>{
-    let li=document.createElement("li");
-    li.textContent=`${i+1}. ${n} Lv.${p.level}`;
-    leaderboardList.appendChild(li);
-  });
-}
 </script>
+
 </body>
 </html>
