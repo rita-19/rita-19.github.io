@@ -18,10 +18,7 @@ body{
   text-align:center;
   transition:.3s;
 }
-.dark body{
-  background: linear-gradient(#1c1c1c,#333);
-  color:#fff;
-}
+
 .btn{
   padding:10px 16px;
   border:none;
@@ -85,8 +82,7 @@ body.dark input{
   <button class="btn" onclick="UI.show('quiz')">小測驗</button>
   <button class="btn" onclick="UI.show('chart')">數據</button>
   <button class="btn" onclick="UI.show('leaderboard')">排行榜</button>
-  <button class="btn" onclick="toggleMode()">🌙 深色模式</button>
-
+  <button class="btn" onclick="UI.toggleDark()">🌙 深色模式</button>
 </div>
 
 <!-- ================= 首頁 ================= -->
@@ -175,9 +171,9 @@ const UI = {
     document.getElementById(id).style.display="block";
   },
   toggleDark(){
-    State.dark=!State.dark;
-    document.body.style.filter = State.dark ? "invert(1)" : "";
-  }
+  State.dark = !State.dark;
+  document.body.classList.toggle("dark", State.dark);
+}
 };
 
 /* ================= 玩家 ================= */
