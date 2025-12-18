@@ -3,14 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <title>Study Program</title>
+
+<!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
+/* ================= 全域 ================= */
 body{
-  margin:0;
+  margin:0; padding:0;
   font-family:"Microsoft JhengHei",sans-serif;
   background: linear-gradient(#ffe6f7,#d6e8ff);
   text-align:center;
+  transition:.4s;
+}
+.dark-mode{
+  background:linear-gradient(#1c1c1c,#333);
+  color:#fff;
 }
 .btn{
   padding:10px 15px;
@@ -20,46 +28,35 @@ body{
   background:#ffb8d1;
   cursor:pointer;
 }
-.btn:hover{background:#ff95be;}
+.dark-mode .btn{background:#555;color:#fff;}
 .card{
-  background:white;
+  background:#fff;
   padding:20px;
-  margin:15px;
+  margin:15px auto;
   border-radius:20px;
-  display:inline-block;
-  width:260px;
+  width:300px;
+  box-shadow:0 4px 12px rgba(0,0,0,.2);
 }
-.section{display:none;}
-.level-bar{
-  width:80%; height:20px;
-  background:#eee;
-  border-radius:10px;
-  margin:auto;
-}
-.level-progress{
-  height:100%;
-  background:#ff95be;
-  width:0%;
-}
-.chick-container{
-  width:120px;
-  margin:auto;
-  animation: float 3s ease-in-out infinite;
-}
+.dark-mode .card{background:#222;color:#fff;}
+.section{display:none}
+
+/* ================= 小雞 ================= */
+.chick-container{width:200px;margin:20px auto;}
 @keyframes float{
   0%{transform:translateY(0)}
   50%{transform:translateY(-10px)}
   100%{transform:translateY(0)}
 }
-.popup{
-  position:fixed;
-  top:20px;
-  left:50%;
-  transform:translateX(-50%);
-  background:#ffeb3b;
-  padding:10px 20px;
-  border-radius:20px;
-  font-weight:bold;
+#home .chick-container{animation:float 3s ease-in-out infinite}
+
+/* ================= 進度條 ================= */
+.level-bar{
+  width:80%;height:18px;background:#ddd;
+  border-radius:10px;margin:auto;overflow:hidden;
+}
+.level-progress{
+  height:100%;width:0%;
+  background:linear-gradient(90deg,#ff95be,#ffb8d1);
 }
 </style>
 </head>
@@ -67,49 +64,59 @@ body{
 <body>
 
 <h1>🌟 Study Program</h1>
+<p>小雞助教陪你學習冒險</p>
 
+<!-- 導覽 -->
 <div>
-  <button class="btn" onclick="showSection('home')">首頁</button>
-  <button class="btn" onclick="showSection('pomodoro')">番茄鐘</button>
-  <button class="btn" onclick="showSection('quiz')">小測驗</button>
-  <button class="btn" onclick="showSection('chart')">讀書數據</button>
-  <button class="btn" onclick="showSection('leaderboard')">排行榜</button>
+  <button class="btn" onclick="showSection('home')">🏠 首頁</button>
+  <button class="btn" onclick="showSection('pomodoro')">🍅 番茄鐘</button>
+  <button class="btn" onclick="showSection('quiz')">🎮 測驗</button>
+  <button class="btn" onclick="showSection('chart')">📊 紀錄</button>
+  <button class="btn" onclick="showSection('leaderboard')">🏆 排行</button>
+  <button class="btn" onclick="toggleMode()">🌙 深色</button>
 </div>
 
-<!-- ===== 首頁 ===== -->
-<section id="home" class="section" style="display:block">
-  <div class="chick-container">🐥</div>
+<hr width="80%">
 
+<!-- ================= 首頁 ================= -->
+<section id="home" class="section" style="display:block">
   <div class="card">
-    <h3>今日讀書</h3>
-    <p id="todayTime">0 小時</p>
+    <h3>🐥 小雞</h3>
+    <div class="chick-container">
+      <svg viewBox="0 0 200 200">
+        <circle cx="100" cy="120" r="50" fill="#FFEB3B"/>
+        <circle cx="80" cy="100" r="8"/>
+        <circle cx="120" cy="100" r="8"/>
+        <polygon points="100,115 90,130 110,130" fill="#FF9800"/>
+      </svg>
+    </div>
+    <p id="chickPersonalityText">尚未測驗</p>
   </div>
 
   <div class="card">
-    <h3>等級</h3>
+    <h3>⬆️ 等級</h3>
     <div class="level-bar">
       <div id="levelProgress" class="level-progress"></div>
     </div>
     <p id="levelText">Lv.1 冒險新手</p>
-  </div>
-
-  <div class="card">
-    <h3>小雞性格</h3>
-    <p id="chickPersonalityText">尚未測驗</p>
+    <p>今日讀書：<span id="todayTime">0</span> 小時</p>
   </div>
 </section>
 
-<!-- ===== 番茄鐘 ===== -->
+<!-- ================= 番茄鐘 ================= -->
 <section id="pomodoro" class="section">
-  <h2>🍅 番茄鐘</h2>
-  <div id="timerDisplay" style="font-size:40px">25:00</div>
-  <button class="btn" onclick="startTimer()">開始</button>
-  <button class="btn" onclick="resetTimer()">重設</button>
+  <div class="card">
+    <h2>🍅 番茄鐘</h2>
+    <div id="timerDisplay" style="font-size:48px">25:00</div>
+    <button class="btn" onclick="startTimer()">開始</button>
+    <button class="btn" onclick="resetTimer()">重設</button>
+  </div>
 </section>
 
-<!-- ===== 小測驗 ===== -->
+<!-- ================= 小測驗 ================= -->
 <section id="quiz" class="section">
   <div class="card">
+    <h2>🎮 小雞測驗</h2>
     <p id="quizQuestion"></p>
     <div id="quizOptions"></div>
     <h3 id="quizResult"></h3>
@@ -117,137 +124,144 @@ body{
   </div>
 </section>
 
-<!-- ===== 圖表 ===== -->
+<!-- ================= 圖表 ================= -->
 <section id="chart" class="section">
-  <canvas id="studyChart" width="350"></canvas>
+  <div class="card">
+    <h2>📊 讀書紀錄</h2>
+    <canvas id="studyChart" width="280"></canvas>
+  </div>
 </section>
 
-<!-- ===== 排行榜 ===== -->
+<!-- ================= 排行榜 ================= -->
 <section id="leaderboard" class="section">
   <div class="card">
-    <input id="playerName" placeholder="輸入名字">
+    <h2>🏆 排行榜</h2>
+    <input id="playerName" placeholder="輸入名稱">
     <button class="btn" onclick="login()">登入</button>
+    <p>分享碼：<span id="shareCode">-</span></p>
     <ul id="leaderboardList"></ul>
   </div>
 </section>
 
 <script>
-/* ===== 狀態 ===== */
-let level=1, exp=0;
-let timer=25*60, timerInt;
-let studyData=[0,0,0,0,0,0,0];
-let quizIndex=0, quizAnswers=[], chickPersonality="";
-let players={}, currentPlayer=null;
-
-/* ===== 工具 ===== */
+/* ========== 基本切換 ========== */
 function showSection(id){
   document.querySelectorAll(".section").forEach(s=>s.style.display="none");
   document.getElementById(id).style.display="block";
 }
 
-/* ===== 等級 ===== */
-function addEXP(v){
-  exp+=v;
-  if(exp>=level*50){exp=0;level++;popup("⬆️ 升級！")}
-  updateLevelUI();
-}
-function updateLevelUI(){
-  levelProgress.style.width=(exp/(level*50))*100+"%";
-  levelText.textContent=`Lv.${level}`;
-}
-
-/* ===== 番茄鐘 ===== */
-function updateTimer(){
-  let m=Math.floor(timer/60), s=timer%60;
-  timerDisplay.textContent=`${m}:${s.toString().padStart(2,"0")}`;
-}
-function startTimer(){
-  clearInterval(timerInt);
-  timerInt=setInterval(()=>{
-    if(timer<=0){
-      clearInterval(timerInt);
-      addEXP(10);
-      addStudy(0.5);
-      return;
-    }
-    timer--; updateTimer();
-  },1000);
-}
-function resetTimer(){timer=25*60;updateTimer();}
-
-/* ===== 讀書 ===== */
-function addStudy(h){
-  let d=(new Date().getDay()+6)%7;
-  studyData[d]+=h;
-  todayTime.textContent=studyData[d]+" 小時";
+/* ========== 深色模式 ========== */
+let dark=false;
+function toggleMode(){
+  dark=!dark;
+  document.body.classList.toggle("dark-mode",dark);
   chart.update();
 }
 
-/* ===== 測驗 ===== */
-const quizQ=[
- {q:"學習時你通常？",a:["專注","放空","努力"]},
- {q:"遇到困難你會？",a:["解決","休息","求助"]}
+/* ========== 玩家 / 存檔 ========== */
+let players=JSON.parse(localStorage.getItem("players")||"{}");
+let current=null;
+
+/* ========== 等級 ========== */
+let level=1,exp=0;
+function addEXP(n){
+  exp+=n;
+  if(exp>=level*50){exp=0;level++;}
+  updateLevel();
+}
+function updateLevel(){
+  document.getElementById("levelText").textContent=`Lv.${level}`;
+  document.getElementById("levelProgress").style.width=(exp/(level*50)*100)+"%";
+}
+
+/* ========== 番茄鐘 ========== */
+let time=1500,interval;
+function updateTimer(){
+  let m=Math.floor(time/60),s=time%60;
+  timerDisplay.textContent=`${m}:${s<10?"0":""}${s}`;
+}
+function startTimer(){
+  clearInterval(interval);
+  interval=setInterval(()=>{
+    time--;
+    if(time<=0){
+      clearInterval(interval);
+      addEXP(10);
+      addStudy(0.5);
+      save();
+    }
+    updateTimer();
+  },1000);
+}
+function resetTimer(){clearInterval(interval);time=1500;updateTimer();}
+updateTimer();
+
+/* ========== 圖表 ========== */
+let study=[0,0,0,0,0,0,0];
+const chart=new Chart(studyChart,{
+  type:"line",
+  data:{labels:["一","二","三","四","五","六","日"],
+  datasets:[{data:study,label:"小時"}]}
+});
+function addStudy(h){
+  let d=(new Date().getDay()+6)%7;
+  study[d]+=h;
+  todayTime.textContent=study[d];
+  chart.update();
+}
+
+/* ========== 測驗 ========== */
+const quiz=[
+ {q:"今天心情？",a:["專注","累","精神"]},
+ {q:"遇到困難？",a:["努力","休息","找人"]}
 ];
+let qi=0,qa=[];
 function showQuiz(){
-  quizQuestion.textContent=quizQ[quizIndex].q;
+  quizQuestion.textContent=quiz[qi].q;
   quizOptions.innerHTML="";
-  quizQ[quizIndex].a.forEach(o=>{
+  quiz[qi].a.forEach(o=>{
     let b=document.createElement("button");
-    b.className="btn"; b.textContent=o;
-    b.onclick=()=>select(o);
+    b.className="btn";b.textContent=o;
+    b.onclick=()=>{qa.push(o);qi++;qi<quiz.length?showQuiz():finishQuiz();}
     quizOptions.appendChild(b);
   });
 }
-function select(a){
-  quizAnswers.push(a); quizIndex++;
-  if(quizIndex<quizQ.length) showQuiz();
-  else{
-    chickPersonality="勇敢小雞";
-    quizResult.textContent="🐥 "+chickPersonality;
-    chickPersonalityText.textContent=chickPersonality;
-  }
+function finishQuiz(){
+  chickPersonalityText.textContent="勇敢小雞";
 }
-function resetQuiz(){
-  quizIndex=0;quizAnswers=[];quizResult.textContent="";
-  showQuiz();
-}
+function resetQuiz(){qi=0;qa=[];showQuiz();}
+showQuiz();
 
-/* ===== 排行榜 ===== */
+/* ========== 登入 / 排行 ========== */
 function login(){
-  const n=playerName.value.trim();
-  if(!n) return;
-  currentPlayer=n;
-  players[n]={level,exp};
-  renderLeaderboard();
+  const name=playerName.value.trim();
+  if(!name) return;
+  current=name;
+  if(!players[name]) players[name]={level:1,exp:0,study:[0,0,0,0,0,0,0],code:Math.random().toString(36).slice(2,6)};
+  load();
 }
-function renderLeaderboard(){
+function save(){
+  if(!current) return;
+  players[current]={level,exp,study,code:players[current].code};
+  localStorage.setItem("players",JSON.stringify(players));
+  updateBoard();
+}
+function load(){
+  let p=players[current];
+  level=p.level;exp=p.exp;study=p.study;
+  shareCode.textContent=p.code;
+  updateLevel();chart.update();
+  updateBoard();
+}
+function updateBoard(){
   leaderboardList.innerHTML="";
   Object.entries(players).sort((a,b)=>b[1].level-a[1].level)
-    .forEach(([n,p],i)=>{
-      let li=document.createElement("li");
-      li.textContent=`${i+1}. ${n} Lv.${p.level}`;
-      leaderboardList.appendChild(li);
-    });
+  .forEach(([n,p],i)=>{
+    let li=document.createElement("li");
+    li.textContent=`${i+1}. ${n} Lv.${p.level}`;
+    leaderboardList.appendChild(li);
+  });
 }
-
-/* ===== 圖表 ===== */
-const chart=new Chart(studyChart,{
-  type:"line",
-  data:{labels:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
-  datasets:[{data:studyData,label:"讀書時數"}]}
-});
-
-/* ===== 提示 ===== */
-function popup(t){
-  const d=document.createElement("div");
-  d.className="popup"; d.textContent=t;
-  document.body.appendChild(d);
-  setTimeout(()=>d.remove(),1500);
-}
-
-/* ===== 初始化 ===== */
-updateTimer(); updateLevelUI(); showQuiz();
 </script>
-
 </body>
 </html>
