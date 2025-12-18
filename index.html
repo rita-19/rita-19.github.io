@@ -68,6 +68,128 @@ body.dark input{
   color:#fff;
   border:none;
 }
+/* ================= 🌙 深色模式｜王者級配色 ================= */
+body.dark{
+  background: linear-gradient(160deg,#0f2027,#203a43,#2c5364);
+  color:#eaeaea;
+}
+
+/* 導覽按鈕 */
+body.dark .btn{
+  background: linear-gradient(145deg,#3a3a3a,#2a2a2a);
+  color:#fff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+}
+body.dark .btn:hover{
+  transform: translateY(-2px);
+  background: linear-gradient(145deg,#444,#333);
+}
+
+/* 卡片 */
+body.dark .card{
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+}
+
+/* 輸入框 */
+body.dark input{
+  background:#1f2933;
+  color:#fff;
+  border:1px solid #3a4a5a;
+}
+
+/* 標題 */
+body.dark h1,
+body.dark h2,
+body.dark h3{
+  color:#ffffff;
+}
+
+/* 分隔線 */
+body.dark hr{
+  border-color: rgba(255,255,255,0.2);
+}
+
+/* 🌟 小雞微光（深色模式限定） */
+body.dark .chick-container{
+  filter: drop-shadow(0 0 12px rgba(255,255,180,0.6));
+}
+/* ================= 🐥 深色模式限定｜小雞進化特效 ================= */
+
+/* 進化呼吸動畫 */
+@keyframes evolvePulse{
+  0%{
+    transform: scale(1);
+    filter: drop-shadow(0 0 6px rgba(255,255,180,0.4));
+  }
+  50%{
+    transform: scale(1.12);
+    filter: drop-shadow(0 0 22px rgba(255,255,200,0.9));
+  }
+  100%{
+    transform: scale(1);
+    filter: drop-shadow(0 0 6px rgba(255,255,180,0.4));
+  }
+}
+
+/* 深色模式才啟動 */
+body.dark .chick-container{
+  animation: evolvePulse 3s ease-in-out infinite;
+  position: relative;
+}
+
+/* 粒子光點 */
+body.dark .chick-container::after{
+  content:"✨ ✦ ✧ ✨";
+  position:absolute;
+  top:-20px;
+  left:50%;
+  transform:translateX(-50%);
+  font-size:20px;
+  opacity:0.8;
+  animation: sparkle 2s infinite alternate;
+}
+
+@keyframes sparkle{
+  from{
+    opacity:0.3;
+    transform:translateX(-50%) translateY(0);
+  }
+  to{
+    opacity:1;
+    transform:translateX(-50%) translateY(-8px);
+  }
+}
+/* ================= 🎨 深色模式｜小雞性格光色 ================= */
+
+/* 預設光 */
+body.dark .chick-container{
+  --glow: rgba(255,255,200,0.6);
+}
+
+/* 勇敢小雞 → 金光 */
+body.dark .chick-container.brave{
+  --glow: rgba(255,215,0,0.9);
+}
+
+/* 冷靜小雞 → 藍光 */
+body.dark .chick-container.calm{
+  --glow: rgba(100,180,255,0.9);
+}
+
+/* 呆萌小雞 → 粉光 */
+body.dark .chick-container.cute{
+  --glow: rgba(255,150,200,0.9);
+}
+
+/* 套用光色 */
+body.dark .chick-container{
+  filter: drop-shadow(0 0 18px var(--glow));
+}
+
+
 </style>
 </head>
 
@@ -247,13 +369,39 @@ const Player = {
 
 
 /* ================= UI 更新 ================= */
+function updateChickPersonalityUI(){
+  const chick = document.querySelector(".chick-container");
+  const text = document.getElementById("chickPersonalityText");
+
+  // 清空舊狀態
+  chick.classList.remove("brave","calm","cute");
+
+  if(!State.chickPersonality){
+    text.textContent = "尚未測驗";
+    return;
+  }
+
+  text.textContent = State.chickPersonality;
+
+  if(State.chickPersonality === "勇敢"){
+    chick.classList.add("brave");
+  }else if(State.chickPersonality === "冷靜"){
+    chick.classList.add("calm");
+  }else if(State.chickPersonality === "呆萌"){
+    chick.classList.add("cute");
+  }
+}
+
 UI.update = ()=>{
   document.getElementById("levelText").textContent = "Lv."+State.level;
-  document.getElementById("todayTime").textContent = State.study[new Date().getDay()||6]+" 小時";
-  document.getElementById("chickPersonalityText").textContent =
-    State.chickPersonality || "尚未測驗";
+  document.getElementById("todayTime").textContent =
+    State.study[new Date().getDay()||6]+" 小時";
+
+  updateChickPersonalityUI(); // ⭐ 關鍵連接線
+
   Player.updateShareCode();
 };
+
 
 /* ================= 番茄鐘 ================= */
 const Pomodoro = {
