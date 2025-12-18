@@ -11,7 +11,9 @@
 /* ================= 全域樣式 ================= */
 body{
   margin:0;
-  font-family:"Microsoft JhengHei",sans-serif;
+  font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif;
+  font-size: 18px;              /* ⭐ 整體字變大 */
+  line-height: 1.6;             /* ⭐ 老師看得很舒服 */
   background: linear-gradient(#ffe6f7,#d6e8ff);
   text-align:center;
   transition:.3s;
@@ -49,6 +51,26 @@ body{
   margin:auto;
   animation:float 3s infinite;
 }
+/* ================= 深色模式 ================= */
+body.dark{
+  background: linear-gradient(#1e1e1e,#2c2c2c);
+  color:#f5f5f5;
+}
+
+body.dark .card{
+  background:#3a3a3a;
+}
+
+body.dark .btn{
+  background:#555;
+  color:#fff;
+}
+
+body.dark input{
+  background:#555;
+  color:#fff;
+  border:none;
+}
 </style>
 </head>
 
@@ -63,7 +85,8 @@ body{
   <button class="btn" onclick="UI.show('quiz')">小測驗</button>
   <button class="btn" onclick="UI.show('chart')">數據</button>
   <button class="btn" onclick="UI.show('leaderboard')">排行榜</button>
-  <button class="btn" onclick="UI.toggleDark()">深色</button>
+  <button class="btn" onclick="toggleMode()">🌙 深色模式</button>
+
 </div>
 
 <!-- ================= 首頁 ================= -->
@@ -109,8 +132,26 @@ body{
 <!-- ================= 排行榜 ================= -->
 <section id="leaderboard" class="section">
   <div class="card">
-    <input id="playerName" placeholder="名稱">
+    <h3>👤 玩家登入</h3>
+    <input id="playerName" placeholder="輸入名稱">
     <button class="btn" onclick="Player.login()">登入</button>
+
+    <p style="margin-top:10px;">
+      🔑 我的分享碼：
+      <strong id="shareCodeText">尚未登入</strong>
+    </p>
+
+    <hr>
+
+    <h3>🔍 用分享碼查詢</h3>
+    <input id="searchCode" placeholder="輸入分享碼">
+    <button class="btn" onclick="Player.searchByCode()">查詢</button>
+
+    <p id="searchResult"></p>
+
+    <hr>
+
+    <h3>🏆 排行榜</h3>
     <ul id="rank"></ul>
   </div>
 </section>
@@ -142,20 +183,72 @@ const UI = {
 /* ================= 玩家 ================= */
 const Player = {
   login(){
-    const name=document.getElementById("playerName").value.trim();
+    const name = document.getElementById("playerName").value.trim();
     if(!name) return;
 
-    State.players[name] ??= {
-      level:1,
-      study:[0,0,0,0,0,0,0],
-      chickPersonality:""
-    };
+    // 初始化玩家
+    if(!State.players[name]){
+      State.players[name] = {
+        level: 1,
+        study: [0,0,0,0,0,0,0],
+        chickPersonality: "",
+        shareCode: Math.random().toString(36).slice(2,8)
+      };
+    }
 
-    State.currentPlayer=name;
+    State.currentPlayer = name;
+
+    // 將玩家資料同步到 State
     Object.assign(State, State.players[name]);
+
     UI.update();
+    Player.updateShareCode();
+    Player.updateLeaderboard();
+  },
+
+  updateShareCode(){
+    const el = document.getElementById("shareCodeText");
+    if(!State.currentPlayer){
+      el.textContent = "尚未登入";
+    }else{
+      el.textContent = State.players[State.currentPlayer].shareCode;
+    }
+  },
+
+  searchByCode(){
+    const code = document.getElementById("searchCode").value.trim();
+    const result = document.getElementById("searchResult");
+    result.textContent = "";
+
+    if(!code) return;
+
+    for(const name in State.players){
+      if(State.players[name].shareCode === code){
+        result.textContent = `找到玩家：${name}（Lv.${State.players[name].level}）`;
+        return;
+      }
+    }
+
+    result.textContent = "❌ 找不到此分享碼";
+  },
+
+  updateLeaderboard(){
+    const ul = document.getElementById("rank");
+    ul.innerHTML = "";
+
+    const list = Object.entries(State.players);
+
+    list.forEach(([name,data])=>{
+      const li = document.createElement("li");
+      li.textContent = `${name} ｜ Lv.${data.level}`;
+      if(name === State.currentPlayer){
+        li.style.fontWeight = "bold";
+      }
+      ul.appendChild(li);
+    });
   }
 };
+
 
 /* ================= UI 更新 ================= */
 UI.update = ()=>{
@@ -163,6 +256,7 @@ UI.update = ()=>{
   document.getElementById("todayTime").textContent = State.study[new Date().getDay()||6]+" 小時";
   document.getElementById("chickPersonalityText").textContent =
     State.chickPersonality || "尚未測驗";
+  Player.updateShareCode();
 };
 
 /* ================= 番茄鐘 ================= */
