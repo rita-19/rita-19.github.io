@@ -101,6 +101,16 @@ body{
   color:#fff;
   border:1px solid #555;
 }
+/* ⭐ 主頁小雞漂浮動畫 */
+@keyframes float {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0); }
+}
+
+#home .chick-container {
+  animation: float 3s ease-in-out infinite;
+}
 </style>
 </head>
 <body>
@@ -121,23 +131,14 @@ body{
 
 <!-- -------------------- 首頁 -------------------- -->
 <section id="home" class="section" style="display:block;">
-  <div class="card">
-    <h2>今日讀書時間</h2>
-    <p id="todayTime">0 小時</p>
+
+  <!-- ⭐ 歡迎區 -->
+  <div class="card" style="max-width:600px; margin:auto;">
+    <h2>🌟 歡迎回來，冒險者</h2>
+    <p style="opacity:0.8;">今天也一起和小雞努力學習吧！</p>
   </div>
 
-  <div class="card">
-    <h2>升級進度</h2>
-    <div class="level-bar"><div id="levelProgress" class="level-progress"></div></div>
-    <p id="levelText">Lv.1 冒險新手</p>
-  </div>
-  
-  <div class="card">
-  <h2>小雞性格</h2>
-  <p id="chickPersonalityText">尚未測驗</p>
-  </div>
-
-
+  <!-- ⭐ 小雞主視覺 -->
   <div class="chick-container" id="chickContainer">
     <svg class="chick-svg" viewBox="0 0 200 200">
       <circle cx="100" cy="120" r="50" fill="#FFEB3B"/>
@@ -148,7 +149,31 @@ body{
       <polygon points="140,160 130,140 120,160" fill="#FF9800"/>
     </svg>
   </div>
+
+  <!-- ⭐ 資訊卡片區 -->
+  <div style="display:flex; flex-wrap:wrap; justify-content:center;">
+
+    <div class="card">
+      <h3>📚 今日讀書</h3>
+      <p id="todayTime" style="font-size:24px;">0 小時</p>
+    </div>
+
+    <div class="card">
+      <h3>⬆️ 等級進度</h3>
+      <div class="level-bar">
+        <div id="levelProgress" class="level-progress"></div>
+      </div>
+      <p id="levelText">Lv.1 冒險新手</p>
+    </div>
+
+    <div class="card">
+      <h3>🐥 小雞性格</h3>
+      <p id="chickPersonalityText">尚未測驗</p>
+    </div>
+
+  </div>
 </section>
+
 
 <!-- -------------------- 番茄鐘 -------------------- -->
 <section id="pomodoro" class="section">
