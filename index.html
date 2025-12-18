@@ -191,8 +191,12 @@ function showSection(id){
 /* ========== 深色模式 ========== */
 let darkMode=false;
 function toggleMode(){
-  darkMode=!darkMode;
+  darkMode = !darkMode;
   document.body.classList.toggle("dark-mode", darkMode);
+
+  studyChart.options.scales.x.ticks.color = darkMode ? "#fff" : "#000";
+  studyChart.options.scales.y.ticks.color = darkMode ? "#fff" : "#000";
+  studyChart.update();
 }
 
 /* ========== 番茄鐘 ========== */
@@ -207,11 +211,11 @@ function startTimer(){
     if(timer<=0){
       clearInterval(timerInterval);
       addEXP(10);
-      addStudyTime(1);
+      addStudyTime(0.5);
       playDing('pomodoro');
       checkAchievements('pomodoro');
       chickLevelUp();
-      alert("番茄鐘完成！+10 EXP + 1小時讀書");
+      showAchievementPopup("🍅 番茄鐘完成 +10 EXP");
       savePlayerData();
       return;
     }
@@ -279,12 +283,12 @@ function chickLevelUp(){
 }
 
 /* ========== 成就系統 ========== */
-const achievements={
-  level5:{name:"小雞勇者 Lv.5",unlocked:false},
-  level10:{name:"小雞傳奇 Lv.10",unlocked:false},
-  pomodoro5:{name:"專注小雞 🍅x5",unlocked:false},
-};
-let pomodoroCount=0;
+const titles = [
+ "冒險新手","專注學徒","知識勇者","小雞大師","傳說學者"
+];
+document.getElementById("levelText").textContent =
+  `Lv.${level} ${titles[Math.min(level-1, titles.length-1)]}`;
+let players[currentPlayer].pomodoroCount = pomodoroCount;
 function checkAchievements(type){
   if(type==='level' && level>=5 && !achievements.level5.unlocked){ unlockAchievement('level5'); }
   if(type==='level' && level>=10 && !achievements.level10.unlocked){ unlockAchievement('level10'); }
@@ -317,7 +321,21 @@ const studyChart=new Chart(document.getElementById("studyChart"),{
       tension:0.3
     }]
   },
-  options:{scales:{y:{beginAtZero:true}}}
+  options: {
+  scales: {
+    x: {
+      ticks: {
+        color: darkMode ? "#fff" : "#000"
+      }
+    },
+    y: {
+      beginAtZero: true,
+      ticks: {
+        color: darkMode ? "#fff" : "#000"
+      }
+    }
+  }
+  }
 });
 function addStudyTime(hours){
   const day=new Date().getDay(); //0=Sun
@@ -336,6 +354,7 @@ const quizQuestions=[
   {q:"學習環境你偏好？", a:["安靜","音樂","熱鬧"]},
   {q:"你覺得自己像哪隻小雞？", a:["呆萌","勇敢","調皮"]}
 ];
+let quizAnswers = [];
 let quizIndex=0;
 function showQuiz(){
   const q=quizQuestions[quizIndex];
@@ -346,16 +365,50 @@ function showQuiz(){
     const b=document.createElement("button");
     b.className="btn";
     b.textContent=opt;
-    b.onclick=nextQuiz;
+    b.onclick = () => selectAnswer(opt);
     options.appendChild(b);
   });
 }
 function nextQuiz(){
   quizIndex++;
   if(quizIndex<quizQuestions.length){showQuiz();}
-  else{document.getElementById("quizResult").textContent="小雞性格已生成 🐥";}
-}
+  else{
+  const result = calculateQuizResult();
+  document.getElementById("quizResult").textContent =
+    `🐥 你的性格是【${result}】`;
+  }
+
 showQuiz();
+function selectAnswer(answer){
+  quizAnswers.push(answer);
+  nextQuiz();
+}
+function calculateQuizResult(){
+  let score = { 
+    勇敢:0, 
+    呆萌:0, 
+    冷靜:0 
+  };
+
+  quizAnswers.forEach(a=>{
+    if(a==="努力解決" || a==="勇敢" || a==="冒險帽"){
+      score.勇敢++;
+    }
+    if(a==="呆萌" || a==="休息"){
+      score.呆萌++;
+    }
+    if(a==="專注" || a==="安靜" || a==="音樂"){
+      score.冷靜++;
+    }
+  });
+
+  let maxType = "勇敢";
+  for(const k in score){
+    if(score[k] > score[maxType]) maxType = k;
+  }
+
+  return maxType + "小雞";
+}
 
 /* ========== 排行榜 + 匿名分享碼 + 本地儲存 ========== */
 let players={};
@@ -393,7 +446,9 @@ function loginPlayer(){
   for(let i=0;i<7;i++){ studyData[i]=p.study[i]||0; }
   studyChart.data.datasets[0].data=studyData; studyChart.update();
   pomodoroCount=0;
-  Object.assign(achievements, p.achievements || {});
+  for (const k in achievements) {
+  achievements[k].unlocked = p.achievements?.[k]?.unlocked || false;
+  }
   document.getElementById("todayTime").textContent=studyData[(new Date().getDay()==0?6:new Date().getDay()-1)]+" 小時";
 
   document.getElementById("shareCode").textContent=p.shareCode;
@@ -417,6 +472,10 @@ function updateLeaderboard(){
   arr.forEach(([name,data],i)=>{
     const li=document.createElement("li");
     li.textContent=`${i+1}. ${name} Lv.${data.level} EXP:${data.exp}`;
+
+    if(name === currentPlayer){
+      li.style.fontWeight = "bold";
+    }
     ul.appendChild(li);
   });
 }
