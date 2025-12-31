@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>Study Program｜王者完整版</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:"Microsoft JhengHei","微軟正黑體",sans-serif;
+  font-size:18px;
+  background:linear-gradient(#ffe6f7,#d6e8ff);
+  text-align:center;
+  transition:.3s;
+}
+body.dark{
+  background:linear-gradient(160deg,#0f2027,#203a43,#2c5364);
+  color:#fff;
+}
+.btn{
+  padding:10px 16px;
+  border:none;
+  border-radius:14px;
+  background:#ffb8d1;
+  cursor:pointer;
+  margin:5px;
+}
+body.dark .btn{background:#444;color:#fff}
+.card{
+  background:#fff;
+  border-radius:20px;
+  padding:20px;
+  margin:15px;
+  display:inline-block;
+  width:280px;
+}
+body.dark .card{background:rgba(255,255,255,.1)}
+.section{display:none}
+
+/* 🐥 小雞 */
+@keyframes float{0%{transform:translateY(0)}50%{transform:translateY(-10px)}100%{transform:translateY(0)}}
+.chick-container{
+  font-size:80px;
+  animation:float 3s infinite;
+}
+body.dark .chick-container{filter:drop-shadow(0 0 18px gold)}
+.chick-container.brave{filter:drop-shadow(0 0 20px gold)}
+.chick-container.calm{filter:drop-shadow(0 0 20px #6cf)}
+.chick-container.cute{filter:drop-shadow(0 0 20px pink)}
+</style>
+</head>
+
+<body>
+
+<h1>🐥 Study Program</h1>
+
+<div>
+  <button class="btn" onclick="UI.show('home')">首頁</button>
+  <button class="btn" onclick="UI.show('pomodoro')">番茄鐘</button>
+  <button class="btn" onclick="UI.show('quiz')">小測驗</button>
+  <button class="btn" onclick="UI.show('chart')">圖表</button>
+  <button class="btn" onclick="UI.show('leaderboard')">排行榜</button>
+  <button class="btn" onclick="UI.toggleDark()">🌙</button>
+</div>
+
+<!-- 首頁 -->
+<section id="home" class="section" style="display:block">
+  <div class="chick-container" id="chick">🐥</div>
+  <div class="card"><h3>等級</h3><p id="levelText">Lv.1</p></div>
+  <div class="card"><h3>今日讀書</h3><p id="todayTime">0 小時</p></div>
+  <div class="card"><h3>小雞性格</h3><p id="chickText">尚未測驗</p></div>
+</section>
+
+<!-- 番茄鐘 -->
+<section id="pomodoro" class="section">
+  <h2>🍅 番茄鐘</h2>
+  <div id="timer" style="font-size:40px">25:00</div>
+  <button class="btn" onclick="Pomodoro.start()">開始</button>
+  <button class="btn" onclick="Pomodoro.pause()">暫停</button>
+  <button class="btn" onclick="Pomodoro.reset()">重設</button>
+</section>
+
+<!-- 測驗 -->
+<section id="quiz" class="section">
+  <div class="card">
+    <p id="quizQ"></p>
+    <div id="quizOpt"></div>
+  </div>
+</section>
+
+<!-- 圖表 -->
+<section id="chart" class="section">
+  <canvas id="studyChart" width="300"></canvas>
+</section>
+
+<!-- 排行榜 -->
+<section id="leaderboard" class="section">
+  <div class="card">
+    <h3>登入</h3>
+    <input id="playerName" placeholder="名字">
+    <button class="btn" onclick="Player.login()">登入</button>
+
+    <p>分享碼：<strong id="myCode">---</strong></p>
+
+    <hr>
+    <input id="searchCode" placeholder="輸入分享碼">
+    <button class="btn" onclick="Player.search()">查詢</button>
+    <p id="searchResult"></p>
+
+    <hr>
+    <ul id="rank"></ul>
+  </div>
+</section>
+
+<script>
+/* ===== 狀態 ===== */
+const State={
+  level:1,exp:0,
+  study:[0,0,0,0,0,0,0],
+  chick:"",
+  dark:false,
+  players:{},
+  current:null
+};
+
+/* ===== 存檔 ===== */
+function save(){localStorage.setItem("study",JSON.stringify(State))}
+function load(){const d=localStorage.getItem("study");if(d)Object.assign(State,JSON.parse(d))}
+
+/* ===== UI ===== */
+const UI={
+  show(id){
+    document.querySelectorAll(".section").forEach(s=>s.style.display="none");
+    document.getElementById(id).style.display="block";
+  },
+  toggleDark(){
+    State.dark=!State.dark;
+    document.body.classList.toggle("dark",State.dark);
+    save();
+  },
+  update(){
+    levelText.textContent="Lv."+State.level;
+    todayTime.textContent=State.study[new Date().getDay()||6]+" 小時";
+    chickText.textContent=State.chick||"尚未測驗";
+    chick.className="chick-container "+(State.chick==="勇敢"?"brave":State.chick==="冷靜"?"calm":State.chick==="呆萌"?"cute":"");
+    Player.updateUI();
+  }
+};
+
+/* ===== 番茄鐘 ===== */
+const Pomodoro={
+  time:1500,timer:null,
+  start(){
+    if(this.timer)return;
+    this.timer=setInterval(()=>{
+      this.time--;
+      this.render();
+      if(this.time<=0){this.finish()}
+    },1000)
+  },
+  pause(){clearInterval(this.timer);this.timer=null},
+  reset(){this.pause();this.time=1500;this.render()},
+  finish(){
+    this.pause();
+    this.time=1500;
+    State.study[new Date().getDay()||6]+=0.5;
+    addExp(20);
+    alert("🍅 完成！");
+  },
+  render(){
+    timer.textContent=Math.floor(this.time/60)+":"+String(this.time%60).padStart(2,"0");
+  }
+};
+
+/* ===== 升級 ===== */
+function addExp(v){
+  State.exp+=v;
+  if(State.exp>=State.level*50){
+    State.exp=0;State.level++;
+    alert("⬆️ 升級 Lv."+State.level);
+  }
+  UI.update();save();
+}
+
+/* ===== 測驗 ===== */
+const Quiz={
+  i:0,
+  q:[
+    ["你像哪隻小雞？",["勇敢","冷靜","呆萌"]],
+    ["遇到困難你會？",["勇敢","冷靜","呆萌"]]
+  ],
+  show(){
+    quizQ.textContent=this.q[this.i][0];
+    quizOpt.innerHTML="";
+    this.q[this.i][1].forEach(a=>{
+      const b=document.createElement("button");
+      b.className="btn";
+      b.textContent=a;
+      b.onclick=()=>{State.chick=a;this.i++;this.i<this.q.length?this.show():this.finish()};
+      quizOpt.appendChild(b);
+    })
+  },
+  finish(){
+    addExp(30);
+    alert("🐥 測驗完成！");
+    UI.update();save();
+  }
+};
+
+/* ===== 玩家 ===== */
+const Player={
+  login(){
+    const n=playerName.value.trim();
+    if(!n)return;
+    if(!State.players[n]){
+      State.players[n]={level:State.level,code:Math.random().toString(36).slice(2,8)};
+    }
+    State.current=n;
+    save();this.updateUI();this.updateRank();
+  },
+  updateUI(){
+    myCode.textContent=State.current?State.players[State.current].code:"---";
+  },
+  search(){
+    const c=searchCode.value;
+    for(let n in State.players){
+      if(State.players[n].code===c){
+        searchResult.textContent=`找到 ${n} Lv.${State.players[n].level}`;
+        return;
+      }
+    }
+    searchResult.textContent="找不到";
+  },
+  updateRank(){
+    rank.innerHTML="";
+    Object.entries(State.players).forEach(([n,d])=>{
+      const li=document.createElement("li");
+      li.textContent=`${n} Lv.${d.level}`;
+      if(n===State.current)li.style.fontWeight="bold";
+      rank.appendChild(li);
+    })
+  }
+};
+
+/* ===== 圖表 ===== */
+const chart=new Chart(studyChart,{
+  type:"line",
+  data:{labels:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],datasets:[{data:State.study}]}
+});
+
+/* ===== 啟動 ===== */
+load();UI.update();Quiz.show();Pomodoro.render();
+</script>
+
+</body>
+</html>
