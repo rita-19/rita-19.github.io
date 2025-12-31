@@ -230,15 +230,34 @@ body.dark .chick-container{
 <!-- ================= 番茄鐘 ================= -->
 <section id="pomodoro" class="section">
   <h2>🍅 番茄鐘</h2>
-  <div id="timer">25:00</div>
-  <button class="btn" onclick="Pomodoro.start()">開始</button>
+  <h3 id="pomodoroMode">🎯 專注中</h3>
+
+  <div id="timer" style="font-size:40px;margin:15px">25:00</div>
+
+  <button class="btn" onclick="Pomodoro.start()">▶ 開始</button>
+  <button class="btn" onclick="Pomodoro.pause()">⏸ 暫停</button>
+  <button class="btn" onclick="Pomodoro.reset()">🔄 重設</button>
 </section>
 
 <!-- ================= 小測驗 ================= -->
 <section id="quiz" class="section">
   <div class="card">
-    <p id="quizQ">題目</p>
+    <h3>🐥 小雞性格測驗</h3>
+
+    <p id="quizProgress"></p>
+    <p id="quizQ"></p>
+
     <div id="quizOpt"></div>
+
+    <button class="btn" onclick="Quiz.next()" style="display:none" id="nextBtn">
+      下一題
+    </button>
+
+    <p id="quizResult" style="font-weight:bold;margin-top:10px;"></p>
+
+    <button class="btn" onclick="Quiz.reset()" style="display:none" id="retryBtn">
+      再玩一次
+    </button>
   </div>
 </section>
 
@@ -275,6 +294,18 @@ body.dark .chick-container{
 </section>
 
 <script>
+
+/* ================= 資料保存 ================= */
+function saveGame(){
+  localStorage.setItem("studyGame", JSON.stringify(State));
+}
+
+function loadGame(){
+  const data = localStorage.getItem("studyGame");
+  if(data){
+    Object.assign(State, JSON.parse(data));
+  }
+}
 /* ================= 狀態管理（核心） ================= */
 const State = {
   level:1,
@@ -297,7 +328,31 @@ const UI = {
   document.body.classList.toggle("dark", State.dark);
 }
 };
+/* ================= 升級系統 ================= */
+const LevelSystem = {
+  addExp(amount){
+    State.exp += amount;
+    let need = State.level * 50;
+    let up = false;
 
+    while(State.exp >= need){
+      State.exp -= need;
+      State.level++;
+      need = State.level * 50;
+      up = true;
+    }
+
+    if(up){
+      const chick = document.querySelector(".chick-container");
+      chick.classList.add("evolve");
+      setTimeout(()=>chick.classList.remove("evolve"),1500);
+      alert(`⬆️ 升級成功！Lv.${State.level}`);
+    }
+
+    UI.update();
+    saveGame();
+  }
+};
 /* ================= 玩家 ================= */
 const Player = {
   login(){
@@ -403,40 +458,190 @@ UI.update = ()=>{
 };
 
 
-/* ================= 番茄鐘 ================= */
+/* ================= 🍅 番茄鐘｜王者最終型 ================= */
 const Pomodoro = {
-  time:1500,
+  mode: "focus",
+  durations: {
+    focus: 25 * 60,
+    short: 5 * 60,
+    long: 15 * 60
+  },
+  time: 25 * 60,
+  timerId: null,
+  running: false,
+  streak: 0,
+  total: 0,
+
   start(){
-    setInterval(()=>{
-      Pomodoro.time--;
-      document.getElementById("timer").textContent =
-        Math.floor(Pomodoro.time/60)+":"+String(Pomodoro.time%60).padStart(2,"0");
+    if(this.running) return;
+    this.running = true;
+
+    this.timerId = setInterval(()=>{
+      this.time--;
+
+      if(this.time <= 3 && this.time > 0) this.beep();
+      if(this.time <= 0){
+        this.finish();
+        return;
+      }
+      this.update();
     },1000);
+  },
+
+  pause(){
+    clearInterval(this.timerId);
+    this.running = false;
+  },
+
+  reset(){
+    clearInterval(this.timerId);
+    this.running = false;
+    this.streak = 0;
+    this.setMode("focus");
+  },
+
+  finish(){
+    clearInterval(this.timerId);
+    this.running = false;
+
+    if(this.mode === "focus"){
+      this.total++;
+      this.streak++;
+
+      Level.addExp(25);
+      Achievement.check(this.total);
+      State.study[new Date().getDay() || 6] += 0.5;
+
+      this.evolveChick();
+
+      if(this.streak % 4 === 0){
+        this.setMode("long");
+        alert("🔥 4 顆番茄完成！進入長休息");
+      }else{
+        this.setMode("short");
+        alert("✅ 專注完成，短休息！");
+      }
+    }else{
+      this.setMode("focus");
+      alert("💪 回到專注！");
+    }
+
+    saveGame();
+  },
+
+  setMode(mode){
+    this.mode = mode;
+    this.time = this.durations[mode];
+    this.update();
+    document.getElementById("pomodoroMode").textContent =
+      mode==="focus"?"🎯 專注中":mode==="short"?"☕ 短休息":"🛌 長休息";
+  },
+
+  update(){
+    const m = Math.floor(this.time/60);
+    const s = this.time%60;
+    document.getElementById("timer").textContent =
+      `${m}:${String(s).padStart(2,"0")}`;
+  },
+
+  beep(){
+    const a = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+    a.volume = 0.3;
+    a.play();
+  },
+
+  evolveChick(){
+    const chick = document.querySelector(".chick-container");
+    chick.classList.add("brave");
+    setTimeout(()=>chick.classList.remove("brave"),2000);
   }
 };
+const Level = {
+  exp: 0,
+  level: 1,
 
-/* ================= 小測驗 ================= */
-const Quiz = {
-  q:[
-    ["今天心情？",["專注","累","精神"]],
-    ["你像哪隻小雞？",["勇敢","呆萌","冷靜"]]
-  ],
-  i:0,
-  show(){
-    const q=Quiz.q[Quiz.i];
-    document.getElementById("quizQ").textContent=q[0];
-    const o=document.getElementById("quizOpt");
-    o.innerHTML="";
-    q[1].forEach(a=>{
-      const b=document.createElement("button");
-      b.textContent=a;
-      b.onclick=()=>{State.chickPersonality=a; UI.update()};
-      o.appendChild(b);
+  addExp(amount){
+    this.exp += amount;
+    if(this.exp >= 100){
+      this.exp -= 100;
+      this.level++;
+      State.level = this.level;
+      alert("🎉 升級了！Lv." + this.level);
+    }
+    UI.update();
+  }
+};
+const Achievement = {
+  milestones: [10,25,50],
+
+  check(total){
+    this.milestones.forEach(m=>{
+      if(total === m){
+        alert(`🏆 成就解鎖：完成 ${m} 顆番茄！`);
+      }
     });
   }
 };
-Quiz.show();
+/* ================= 小測驗 ================= */
+const Quiz = {
+  i:0,
+  answers:[],
 
+  q:[
+    {q:"今天的學習狀態？",a:["超專注","有點累","心不在焉"]},
+    {q:"遇到難題你會？",a:["撐完","休息","找朋友"]},
+    {q:"你像哪隻小雞？",a:["勇敢","冷靜","呆萌"]}
+  ],
+
+  show(){
+    document.getElementById("quizQ").textContent=this.q[this.i].q;
+    const o=document.getElementById("quizOpt");
+    o.innerHTML="";
+    this.q[this.i].a.forEach(t=>{
+      const b=document.createElement("button");
+      b.className="btn";
+      b.textContent=t;
+      b.onclick=()=>{
+        this.answers[this.i]=t;
+        this.next();
+      };
+      o.appendChild(b);
+    });
+  },
+
+  next(){
+    this.i++;
+    if(this.i<this.q.length){
+      this.show();
+    }else{
+      this.finish();
+    }
+  },
+
+  finish(){
+    let score={勇敢:0,冷靜:0,呆萌:0};
+    this.answers.forEach(a=>{
+      if(a==="勇敢"||a==="撐完") score.勇敢++;
+      if(a==="冷靜") score.冷靜++;
+      if(a==="呆萌"||a==="休息") score.呆萌++;
+    });
+
+    let type="勇敢";
+    for(let k in score){
+      if(score[k]>score[type]) type=k;
+    }
+
+    State.chickPersonality=type;
+    document.getElementById("quizQ").textContent=`🎉 你是【${type}小雞】`;
+    document.getElementById("quizOpt").innerHTML="";
+
+    LevelSystem.addExp(30);
+    UI.update();
+    saveGame();
+  }
+};
+
+Quiz.show();
 /* ================= 圖表 ================= */
 new Chart(document.getElementById("studyChart"),{
   type:"line",
@@ -445,6 +650,28 @@ new Chart(document.getElementById("studyChart"),{
     datasets:[{data:State.study}]
   }
 });
+loadGame();
+UI.update();
+Quiz.show();
+function saveGame(){
+  localStorage.setItem("studyGame", JSON.stringify({
+    state: State,
+    level: Level,
+    pomodoroTotal: Pomodoro.total
+  }));
+}
+
+function loadGame(){
+  const data = JSON.parse(localStorage.getItem("studyGame"));
+  if(!data) return;
+  Object.assign(State, data.state);
+  Level.level = data.level.level;
+  Level.exp = data.level.exp;
+  Pomodoro.total = data.pomodoroTotal || 0;
+  UI.update();
+}
+
+loadGame();
 </script>
 
 </body>
