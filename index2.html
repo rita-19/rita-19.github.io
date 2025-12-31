@@ -4,20 +4,24 @@
 <meta charset="UTF-8">
 <title>Study Program｜王者完整版</title>
 
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
+/* ===== 全域 ===== */
 body{
   margin:0;
   font-family:"Microsoft JhengHei","微軟正黑體",sans-serif;
   font-size:18px;
   background:linear-gradient(#ffe6f7,#d6e8ff);
   text-align:center;
+  transition:.3s;
 }
 body.dark{
   background:linear-gradient(160deg,#0f2027,#203a43,#2c5364);
   color:#eee;
 }
+.section{display:none}
 .btn{
   padding:10px 16px;
   border:none;
@@ -26,30 +30,33 @@ body.dark{
   cursor:pointer;
   margin:5px;
 }
-body.dark .btn{background:#444;color:#fff}
+body.dark .btn{
+  background:#333;color:#fff;
+}
 .card{
   background:#fff;
   border-radius:20px;
   padding:20px;
-  margin:10px;
-  display:inline-block;
-  width:280px;
+  margin:15px auto;
+  width:300px;
 }
 body.dark .card{
-  background:rgba(255,255,255,0.08);
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.15);
 }
-.section{display:none}
+
+/* ===== 小雞 ===== */
 @keyframes float{
   0%{transform:translateY(0)}
   50%{transform:translateY(-10px)}
   100%{transform:translateY(0)}
 }
 .chick{
-  font-size:80px;
+  font-size:64px;
   animation:float 3s infinite;
 }
 body.dark .chick.brave{filter:drop-shadow(0 0 15px gold)}
-body.dark .chick.calm{filter:drop-shadow(0 0 15px #6cf)}
+body.dark .chick.calm{filter:drop-shadow(0 0 15px #7dd3fc)}
 body.dark .chick.cute{filter:drop-shadow(0 0 15px pink)}
 </style>
 </head>
@@ -58,149 +65,200 @@ body.dark .chick.cute{filter:drop-shadow(0 0 15px pink)}
 
 <h1>🐥 Study Program</h1>
 
+<!-- 導覽 -->
 <div>
-  <button class="btn" onclick="show('home')">首頁</button>
-  <button class="btn" onclick="show('pomodoro')">番茄鐘</button>
-  <button class="btn" onclick="show('quiz')">小測驗</button>
-  <button class="btn" onclick="show('chart')">數據</button>
-  <button class="btn" onclick="show('leader')">排行榜</button>
-  <button class="btn" onclick="toggleDark()">🌙</button>
+  <button class="btn" onclick="UI.show('home')">首頁</button>
+  <button class="btn" onclick="UI.show('pomodoro')">番茄鐘</button>
+  <button class="btn" onclick="UI.show('quiz')">小測驗</button>
+  <button class="btn" onclick="UI.show('chart')">圖表</button>
+  <button class="btn" onclick="UI.show('rank')">排行榜</button>
+  <button class="btn" onclick="UI.toggleDark()">🌙</button>
 </div>
 
+<!-- ===== 首頁 ===== -->
 <section id="home" class="section" style="display:block">
-  <div id="chick" class="chick">🐥</div>
-  <div class="card">等級<br><b id="lv">1</b></div>
-  <div class="card">今日學習<br><b id="today">0</b> 小時</div>
-  <div class="card">性格<br><b id="person">未測驗</b></div>
-</section>
-
-<section id="pomodoro" class="section">
-  <h2 id="mode">🎯 專注</h2>
-  <div id="time" style="font-size:40px">25:00</div>
-  <button class="btn" onclick="pStart()">開始</button>
-  <button class="btn" onclick="pPause()">暫停</button>
-  <button class="btn" onclick="pReset()">重設</button>
-</section>
-
-<section id="quiz" class="section">
+  <div class="chick" id="chick">🐥</div>
   <div class="card">
-    <p id="q"></p>
-    <div id="opt"></div>
+    <p>等級：<span id="level">1</span></p>
+    <p>EXP：<span id="exp">0</span></p>
+    <p>性格：<span id="personality">尚未測驗</span></p>
   </div>
 </section>
 
-<section id="chart" class="section">
-  <canvas id="c"></canvas>
+<!-- ===== 番茄鐘 ===== -->
+<section id="pomodoro" class="section">
+  <h2>🍅 番茄鐘</h2>
+  <div id="timer" style="font-size:40px">25:00</div>
+  <button class="btn" onclick="Pomodoro.start()">開始</button>
+  <button class="btn" onclick="Pomodoro.pause()">暫停</button>
+  <button class="btn" onclick="Pomodoro.reset()">重設</button>
 </section>
 
-<section id="leader" class="section">
+<!-- ===== 小測驗 ===== -->
+<section id="quiz" class="section">
   <div class="card">
-    <input id="name" placeholder="名字">
-    <button class="btn" onclick="login()">登入</button>
-    <p>分享碼：<b id="code">—</b></p>
+    <p id="quizQ"></p>
+    <div id="quizOpt"></div>
+  </div>
+</section>
+
+<!-- ===== 圖表 ===== -->
+<section id="chart" class="section">
+  <canvas id="studyChart" width="300"></canvas>
+</section>
+
+<!-- ===== 排行榜 ===== -->
+<section id="rank" class="section">
+  <div class="card">
+    <input id="nameInput" placeholder="輸入名稱">
+    <button class="btn" onclick="Player.login()">登入</button>
+    <p>分享碼：<b id="shareCode">-</b></p>
     <hr>
-    <input id="find" placeholder="查詢分享碼">
-    <button class="btn" onclick="search()">查詢</button>
-    <p id="result"></p>
-    <hr>
-    <ul id="rank"></ul>
+    <ul id="rankList"></ul>
   </div>
 </section>
 
 <script>
-let S={
-  lv:1,exp:0,study:[0,0,0,0,0,0,0],
-  person:"",dark:false,
-  me:null,players:{}
+/* ===== 狀態 ===== */
+const State={
+  level:1,exp:0,
+  personality:"",
+  study:[0,0,0,0,0,0,0],
+  players:{},
+  current:null,
+  dark:false
 };
 
-function save(){localStorage.study=JSON.stringify(S)}
-function load(){if(localStorage.study)S=JSON.parse(localStorage.study)}
+/* ===== UI ===== */
+const UI={
+  show(id){
+    document.querySelectorAll('.section').forEach(s=>s.style.display='none');
+    document.getElementById(id).style.display='block';
+  },
+  toggleDark(){
+    State.dark=!State.dark;
+    document.body.classList.toggle('dark',State.dark);
+    save();
+  },
+  update(){
+    level.textContent=State.level;
+    exp.textContent=State.exp;
+    personality.textContent=State.personality||"尚未測驗";
+    const c=document.getElementById('chick');
+    c.className="chick";
+    if(State.personality==="勇敢") c.classList.add("brave");
+    if(State.personality==="冷靜") c.classList.add("calm");
+    if(State.personality==="呆萌") c.classList.add("cute");
+  }
+};
 
-function show(id){
-  document.querySelectorAll(".section").forEach(s=>s.style.display="none");
-  document.getElementById(id).style.display="block";
-}
-
-function toggleDark(){
-  S.dark=!S.dark;
-  document.body.classList.toggle("dark",S.dark);
-  save();
-}
-
-function update(){
-  lv.textContent=S.lv;
-  today.textContent=S.study[new Date().getDay()||6];
-  person.textContent=S.person||"未測驗";
-  chick.className="chick "+(S.person==="勇敢"?"brave":S.person==="冷靜"?"calm":S.person==="呆萌"?"cute":"");
-}
-
-let pTime=1500,pInt=null,mode="focus";
-function pRender(){
-  time.textContent=Math.floor(pTime/60)+":"+String(pTime%60).padStart(2,"0");
-}
-function pStart(){
-  if(pInt)return;
-  pInt=setInterval(()=>{
-    pTime--;
-    pRender();
-    if(pTime<=0)pFinish();
-  },1000);
-}
-function pPause(){clearInterval(pInt);pInt=null}
-function pReset(){pPause();mode="focus";pTime=1500;pRender()}
-function pFinish(){
-  pPause();
-  if(mode==="focus"){
-    S.exp+=25;
-    if(S.exp>=S.lv*50){S.exp=0;S.lv++}
-    S.study[new Date().getDay()||6]+=0.5;
-    mode="rest";pTime=300;
-  }else{mode="focus";pTime=1500}
-  update();save();pRender();
+/* ===== 升級 ===== */
+function addExp(n){
+  State.exp+=n;
+  if(State.exp>=State.level*50){
+    State.exp-=State.level*50;
+    State.level++;
+    alert("⬆ 升級！");
+  }
+  UI.update(); save();
 }
 
-const Q=[
- ["你像哪種小雞？",["勇敢","冷靜","呆萌"]],
- ["遇到困難？",["勇敢","冷靜","呆萌"]]
-];
-let qi=0;
-function showQ(){
-  q.textContent=Q[qi][0];
-  opt.innerHTML="";
-  Q[qi][1].forEach(a=>{
-    let b=document.createElement("button");
-    b.className="btn";b.textContent=a;
-    b.onclick=()=>{S.person=a;qi++;qi<Q.length?showQ():finishQ()};
-    opt.appendChild(b);
-  });
-}
-function finishQ(){update();save();alert("完成！")}
+/* ===== 番茄鐘 ===== */
+const Pomodoro={
+  time:1500,timer:null,
+  start(){
+    if(this.timer) return;
+    this.timer=setInterval(()=>{
+      this.time--;
+      if(this.time<=0){
+        this.finish();
+      }
+      this.render();
+    },1000);
+  },
+  pause(){clearInterval(this.timer);this.timer=null},
+  reset(){this.pause();this.time=1500;this.render()},
+  finish(){
+    this.pause();
+    addExp(25);
+    State.study[new Date().getDay()||6]+=0.5;
+    alert("🍅 完成！");
+    this.reset();
+  },
+  render(){
+    timer.textContent=
+      Math.floor(this.time/60)+":"+String(this.time%60).padStart(2,'0');
+  }
+};
 
-function login(){
-  let n=name.value.trim();if(!n)return;
-  if(!S.players[n])S.players[n]={lv:1,code:Math.random().toString(36).slice(2,8)};
-  S.me=n;code.textContent=S.players[n].code;
-  drawRank();save();
-}
-function search(){
-  let c=find.value;result.textContent="找不到";
-  for(let n in S.players)
-    if(S.players[n].code===c)result.textContent=n+" Lv."+S.players[n].lv;
-}
-function drawRank(){
-  rank.innerHTML="";
-  Object.entries(S.players)
-    .sort((a,b)=>b[1].lv-a[1].lv)
-    .forEach(([n,d])=>{
-      let li=document.createElement("li");
-      li.textContent=n+" Lv."+d.lv;
-      rank.appendChild(li);
+/* ===== 小測驗 ===== */
+const Quiz={
+  i:0,
+  q:[
+    ["你像哪隻小雞？",["勇敢","冷靜","呆萌"]]
+  ],
+  show(){
+    quizQ.textContent=this.q[this.i][0];
+    quizOpt.innerHTML="";
+    this.q[this.i][1].forEach(a=>{
+      const b=document.createElement("button");
+      b.className="btn";
+      b.textContent=a;
+      b.onclick=()=>{
+        State.personality=a;
+        addExp(30);
+        UI.update();
+        save();
+        alert("測驗完成！");
+      };
+      quizOpt.appendChild(b);
     });
-}
+  }
+};
+Quiz.show();
 
-load();update();showQ();pRender();drawRank();
-new Chart(c,{type:"line",data:{labels:["一","二","三","四","五","六","日"],datasets:[{data:S.study}]}})
+/* ===== 玩家 / 排行榜 / 分享碼 ===== */
+const Player={
+  login(){
+    const n=nameInput.value.trim();
+    if(!n) return;
+    if(!State.players[n]){
+      State.players[n]={level:1,code:Math.random().toString(36).slice(2,8)};
+    }
+    State.current=n;
+    shareCode.textContent=State.players[n].code;
+    this.updateRank();
+    save();
+  },
+  updateRank(){
+    rankList.innerHTML="";
+    Object.entries(State.players)
+      .sort((a,b)=>b[1].level-a[1].level)
+      .forEach(([n,d])=>{
+        const li=document.createElement("li");
+        li.textContent=`${n}｜Lv.${d.level}`;
+        rankList.appendChild(li);
+      });
+  }
+};
+
+/* ===== 圖表 ===== */
+new Chart(document.getElementById("studyChart"),{
+  type:"line",
+  data:{labels:["一","二","三","四","五","六","日"],
+  datasets:[{data:State.study}]}
+});
+
+/* ===== 存檔 ===== */
+function save(){
+  localStorage.setItem("studyGame",JSON.stringify(State));
+}
+function load(){
+  const d=localStorage.getItem("studyGame");
+  if(d) Object.assign(State,JSON.parse(d));
+  document.body.classList.toggle("dark",State.dark);
+}
+load(); UI.update();
 </script>
 
 </body>
