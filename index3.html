@@ -175,13 +175,25 @@ const Pomodoro={
 
 /* ===== 升級 ===== */
 function addExp(v){
-  State.exp+=v;
-  if(State.exp>=State.level*50){
-    State.exp=0;State.level++;
-    alert("⬆️ 升級 Lv."+State.level);
+  State.exp += v;
+
+  if(State.exp >= State.level * 50){
+    State.exp = 0;
+    State.level++;
+
+    // ⭐⭐ 這三行就是你找的「同步排行榜」⭐⭐
+    if(State.current){
+      State.players[State.current].level = State.level;
+      Player.updateRank();
+    }
+
+    alert("⬆️ 升級 Lv." + State.level);
   }
-  UI.update();save();
+
+  UI.update();
+  save();
 }
+
 
 /* ===== 測驗 ===== */
 const Quiz={
@@ -209,16 +221,24 @@ const Quiz={
 };
 
 /* ===== 玩家 ===== */
-const Player={
-  login(){
-    const n=playerName.value.trim();
-    if(!n)return;
-    if(!State.players[n]){
-      State.players[n]={level:State.level,code:Math.random().toString(36).slice(2,8)};
-    }
-    State.current=n;
-    save();this.updateUI();this.updateRank();
-  },
+login(){
+  const n=playerName.value.trim();
+  if(!n)return;
+
+  if(!State.players[n]){
+    State.players[n]={
+      code:Math.random().toString(36).slice(2,8)
+    };
+  }
+
+  State.players[n].level = State.level; // ⭐ 每次登入同步
+  State.current = n;
+
+  save();
+  this.updateUI();
+  this.updateRank();
+}
+
   updateUI(){
     myCode.textContent=State.current?State.players[State.current].code:"---";
   },
