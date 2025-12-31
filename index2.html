@@ -218,27 +218,63 @@ const Quiz={
 Quiz.show();
 
 /* ===== 玩家 / 排行榜 / 分享碼 ===== */
-const Player={
+const Player = {
   login(){
-    const n=nameInput.value.trim();
-    if(!n) return;
-    if(!State.players[n]){
-      State.players[n]={level:1,code:Math.random().toString(36).slice(2,8)};
+    const name = document.getElementById("playerName").value.trim();
+    if(!name) return alert("請輸入名稱");
+
+    // 如果玩家不存在就建立
+    if(!State.players[name]){
+      State.players[name] = {
+        level: State.level,
+        exp: State.exp,
+        study: [...State.study],
+        chickPersonality: State.chickPersonality,
+        shareCode: Math.random().toString(36).slice(2,8)
+      };
     }
-    State.current=n;
-    shareCode.textContent=State.players[n].code;
-    this.updateRank();
-    save();
+
+    // 設定目前登入玩家
+    State.currentPlayer = name;
+
+    // 👉 把目前 State 存回該玩家
+    State.players[name].level = State.level;
+    State.players[name].exp = State.exp;
+    State.players[name].study = [...State.study];
+    State.players[name].chickPersonality = State.chickPersonality;
+
+    Player.updateShareCode();
+    Player.updateLeaderboard();
+    saveGame();
+
+    alert(`👤 登入成功：${name}`);
   },
-  updateRank(){
-    rankList.innerHTML="";
-    Object.entries(State.players)
-      .sort((a,b)=>b[1].level-a[1].level)
-      .forEach(([n,d])=>{
-        const li=document.createElement("li");
-        li.textContent=`${n}｜Lv.${d.level}`;
-        rankList.appendChild(li);
-      });
+
+  updateShareCode(){
+    const el = document.getElementById("shareCodeText");
+    if(State.currentPlayer){
+      el.textContent = State.players[State.currentPlayer].shareCode;
+    }else{
+      el.textContent = "尚未登入";
+    }
+  },
+
+  updateLeaderboard(){
+    const ul = document.getElementById("rank");
+    ul.innerHTML = "";
+
+    const list = Object.entries(State.players)
+      .sort((a,b)=>b[1].level - a[1].level);
+
+    list.forEach(([name,data])=>{
+      const li = document.createElement("li");
+      li.textContent = `${name} ｜ Lv.${data.level}`;
+      if(name === State.currentPlayer){
+        li.style.fontWeight = "bold";
+        li.textContent += "（你）";
+      }
+      ul.appendChild(li);
+    });
   }
 };
 
