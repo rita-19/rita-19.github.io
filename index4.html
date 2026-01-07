@@ -325,8 +325,8 @@ function speakEnglish(text) {
 // ================= 生成名言 =================
 function generateQuote(catFromUrl = null, indexFromUrl = null) {
   const cat = catFromUrl || document.getElementById("category").value;
-  const lang = document.getElementById("language").value;
-  const list = (lang === "en") ? quotes_en[cat] : quotes_zh[cat];
+  const lang = document.getElementById("language").value; // 讀語言選擇
+  const list = (lang === "en") ? quotes_en[cat] : quotes_zh[cat]; // 根據語言抓庫
 
 
   const index = indexFromUrl !== null
@@ -339,17 +339,26 @@ function generateQuote(catFromUrl = null, indexFromUrl = null) {
   currentIndex = index;
 
   // 🔹 拆中英文
-  const english = text.match(/[A-Za-z0-9.,!?'"()\-: ]+/g)?.join("").trim() || "";
-  const chinese = text.replace(/[A-Za-z0-9.,!?'"()\-: ]+/g, "").trim();
+  let english = "";
+  let chinese = "";
 
+  if (lang === "en") {
+    // 英文庫有中英文
+    english = text.match(/[A-Za-z0-9.,!?'"()\-: ]+/g)?.join("").trim() || "";
+    chinese = text.replace(/[A-Za-z0-9.,!?'"()\-: ]+/g, "").trim();
+  } else {
+    // 中文庫只要中文
+    chinese = text;
+  }
   document.getElementById("quote").innerHTML = `
     <div class="english">${english}</div>
     <div class="chinese">${chinese}</div>
   `;
 
   // 🔊 英文朗讀
-  speakEnglish(english);
-
+  if (lang === "en") {
+    speakEnglish(english);
+  }
   // 🔔 音效
   const sound = document.getElementById("sound");
   sound.currentTime = 0;
