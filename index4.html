@@ -328,15 +328,6 @@ function speakEnglish(text) {
 }
 // 生成名言
 function generateQuote() {
-  const cat = document.getElementById('category').value;
-  const lang = document.getElementById('language').value;
-  setFont(lang);
-
-  const quotes = lang === 'zh' ? quotes_zh[cat] : quotes_en[cat];
-  const randomIndex = Math.floor(Math.random() * quotes.length);
-  const quoteText = quotes[randomIndex];
-
-  function generateQuote() {
     const cat = document.getElementById('category').value;
     const lang = document.getElementById('language').value;
 
