@@ -8,8 +8,8 @@
 body {
     margin: 0;
     font-family: "Microsoft JhengHei", sans-serif;
-    background-color: #000000; /* 黑色底 */
-    color: #ffffff;             /* 文字白色 */
+    background-color: #000000; /* 黑底 */
+    color: #ffffff;             /* 白字 */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -19,7 +19,6 @@ body {
     padding: 20px;
 }
 
-/* 名言文字區域 */
 #quote {
     max-width: 800px;
     font-size: 24px;
@@ -29,7 +28,6 @@ body {
     margin-bottom: 20px;
 }
 
-/* 連結樣式，白字可見 */
 a {
     color: #ffffff !important;
     text-decoration: underline;
@@ -39,17 +37,14 @@ a {
     display: inline-block;
 }
 
-/* 中文字體 */
 .chinese {
     font-family: "Microsoft JhengHei", sans-serif;
 }
 
-/* 英文字體 */
 .english {
     font-family: "Comic Sans MS", cursive, sans-serif;
 }
 
-/* 按鈕樣式 */
 button {
     margin-top: 15px;
     padding: 10px 20px;
@@ -60,8 +55,17 @@ button {
     background-color: #4CAF50;
     color: white;
 }
+
 button:hover {
     background-color: #45a049;
+}
+
+input[type="text"] {
+    background-color: #222;
+    color: #fff;
+    border: 1px solid #555;
+    padding: 5px;
+    border-radius: 5px;
 }
 </style>
 </head>
@@ -91,32 +95,6 @@ button:hover {
 <audio id="sound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
 
 <script>
-const categoryBackgrounds = {
-  success: 'linear-gradient(135deg, #FFA500, #FFD700)', // 橘黃
-  mindset: 'linear-gradient(135deg, #FF4500, #8A2BE2)', // 紅紫
-  life: 'linear-gradient(135deg, #1E90FF, #00CED1)', // 藍青
-  love: 'linear-gradient(135deg, #FF69B4, #FFB6C1)' // 粉紅暖色
-};
-
-function generateQuote() {
-  const cat = document.getElementById('category').value;
-  const lang = document.getElementById('language').value;
-  setFont(lang);
-
-  const quotes = lang === 'zh' ? quotes_zh[cat] : quotes_en[cat];
-  const randomIndex = Math.floor(Math.random() * quotes.length);
-  const quoteText = quotes[randomIndex];
-  document.getElementById('quote').textContent = quoteText;
-
-  // 根據分類改背景
-  document.body.style.backgroundImage = categoryBackgrounds[cat];
-
-  const sound = document.getElementById('sound');
-  sound.currentTime = 0;
-  sound.play();
-}
-</script>
-
 // 中文名言分類
 const quotes_zh = {
   success: [
@@ -124,33 +102,19 @@ const quotes_zh = {
     "成功的花，人們只驚羨她現時的明艷，然而當初她的芽兒，卻浸透了奮鬥的淚泉。- 未知",
     "你的態度決定了你的高度。- 未知",
     "成功並非偶然，而是不斷努力的結果。- 未知",
-    "成功從不眷顧等待的人。- 未知",
-    "第一步是你必須說：「我辦得到」 — 威爾.史密斯",
-    "成功不是終點，努力才是過程。- 未知",
     "努力不一定成功，但放棄一定失敗。- 未知",
-    "只要你肯努力，沒有什麼是不可能的。- 未知",
-    "每一個努力的瞬間，都是在為成功鋪路。- 未知"
+    "只要你肯努力，沒有什麼是不可能的。- 未知"
   ],
   mindset: [
     "勇敢面對困難，生活才會更加精彩。- 未知",
     "不怕路長，只怕志短。- 未知",
     "接受自己的極限，我們才能超越自己！- 愛因斯坦",
-    "行動是成功的基礎，沒有行動，一切都是空談。- 洛克菲勒",
     "信念是我們實現夢想的力量源泉。- 未知",
-    "效率是做好事情，效能是做對的事情。- 彼得·德魯克",
-    "完成工作的方法，是愛惜每一分鐘。- 達爾文",
-    "勇敢地追求夢想，不要退縮。- 未知",
-    "夢想總有它實現的道理。- 未知",
     "面對困難時，保持積極心態是最強的武器。- 未知"
   ],
   life: [
     "人生就像騎單車，要保持平衡，就必須一直向前。- 愛因斯坦",
     "二十年後，你會因為沒做的事而比做過的事更後悔。- 馬克·吐溫",
-    "我不能改變風向，但我能調整帆的方向。- 吉米.迪恩",
-    "天才是百分之一的靈感，加上百分之九十九的汗水。- 愛迪生",
-    "無論你認為自己行還是不行，你都是對的。- 亨利·福特",
-    "成功就是從失敗到失敗，也依然不改熱情。- 丘吉爾",
-    "每一個你不滿意的現在，都有一個你沒有努力的曾經。- 未知",
     "不經歷風雨，怎能見彩虹。- 未知",
     "我們都生活在陰溝裡，但仍有些人仰望星空。- 奧斯卡·王爾德",
     "凡事有因，皆有果。- 未知"
@@ -162,66 +126,92 @@ const quotes_en = {
   success: [
     "No cross, no crown. 不經歷風雨，怎麼遇見彩虹。",
     "Sometime ever, sometime never. 相聚有時，後會無期。",
-    "The greatest test of courage on earth is to bear defeat without losing heart. 世界上對勇氣的最大考驗是忍受失敗而不喪失信心。",
-    "Energy and persistent conquer all things. 能量和堅持可以克服一切。",
-    "The first step is as good as half over. 第一步是最關鍵的一步。",
     "Failure is the mother of success. 失敗乃成功之母。",
-    "Genius is an infinite capacity for taking pains. 所謂的天才是不斷地承受痛楚。",
-    "A man is only as good as what he loves. 一個人要用他所愛的東西有多好來衡量。",
-    "Journey of a thousand miles begins with single step. 千里之行，始於足下。",
     "Better late than never. 別讓過去悄悄偷走了你的當下。"
   ],
   mindset: [
     "Treat yourself well. 善待你自己。",
     "No fear of words, no fear of years. 不懼人言，不畏歲月。",
     "Stars can’t shine without darkness. 如果沒有黑暗，星星如何閃耀。",
-    "Be cheerful and hopeful. 樂觀向上，充滿希望。",
-    "Don’t let the past steal your present. 只要開始，雖晚不遲。",
-    "You don’t have time to be timid. 人生沒有時間膽怯。",
-    "It’s up to you how far you’ll go. 能走多遠取決於你自己。",
-    "Make each day your masterpiece. 讓每一天成為你的傑作。",
-    "Above all, don’t lie to yourself. 最重要的是不要欺騙自己。",
-    "Light tomorrow with today. 用現在點亮未來。"
+    "Make each day your masterpiece. 讓每一天成為你的傑作。"
   ],
   life: [
     "Travel far enough you meet yourself. 走得足夠遠，你就會遇上自己。",
     "Life is short and you deserve to be happy. 生命苦短，你應該過的開心點。",
-    "Time is that we do not come loose. 時光不老，我們不散。",
-    "You can’t be perfect but you can be unique. 你不能十全十美，但你能獨一無二。",
-    "Don’t compare your life with others. There’s no comparison between the sun and the moon. They shine when it’s their time. 別拿你的人生和別人的比較。太陽和月亮沒有可比性。它們都在屬於自己的時刻發光。",
-    "I am not afraid of tomorrow for I have seen yesterday and love today. 我不害怕明天，因為我經歷過昨天，也熱愛今天。",
-    "Only they who fulfill their duties in everyday matters will fulfill them on great occasions. 只有在日常生活中盡責的人才會在重大時刻盡責。",
-    "All things in their being are good for something. 天生我才必有用。",
-    "There’s only one corner of the universe you can be sure of improving, and that’s your own self. 這個宇宙中只有一個角落你肯定可以改進，那就是你自己。",
-    "Difficult circumstances serve as a textbook of life for people. 困難坎坷是人們的生活教科書。"
+    "You can’t be perfect but you can be unique. 你不能十全十美，但你能獨一無二。"
   ],
   love: [
-    "You had me at 'hello'. 第一眼見到你時，我就被你征服了。",
-    "You complete me. 你使我人生完整。",
-    "You are the best thing I never planned. 你是我最美好的意外。",
-    "Being with you has made me so lame. I think I like it. 跟你在一起讓我變得很廢。不過我喜歡。",
-    "To the world you may be just one person. To the person you may be the world. 對這世界來說，你也許只是某個人；但對某個人來說，你卻是全世界。",
-    "If I know what love is, it is because of you. 因為你，我懂得了愛。",
-    "Love me little and love me long. 不求情意綿綿，但求天長地久。",
-    "Life is the flower for which love is the honey. 生命如花，愛情是蜜。",
-    "Being with you is like walking on a very clear morning. 和你在一起就像在一個清爽的早晨漫步。",
-    "It is never too late to fall in love. 愛永遠不會嫌晚。",
-    "If I know what love is, it is because of you. 因為你，我懂得了愛。",
-    "I’ll think of you every step of the way. 我會想你，在漫漫長路的每一步。",
-    "Love is not only a sentiment but also an art. 愛情不僅僅是感情，它也是藝術。",
-    "Every man is a poet when he is in love. 每個戀愛中的人都是詩人。",
-    "Love is like the moon, when it does not increase, it decreases. 愛情就像月亮，不增則減。",
-    "No words are necessary between two loving hearts. 兩顆相愛的心之間不需要言語。",
-    "Being with you is like walking on a very clear morning. 和你在一起就像在一個清爽的早晨漫步。",
-    "You are everything when you are with me, and everything is you when you are not. 跟你在一起時，你是一切，你不在時，一切是你！"
+      “You had me at hello. 第一眼見到你時，我就被你征服了。”,
+    “You complete me. 你使我人生完整。”,
+    “You are the best thing I never planned. 你是我最美好的意外。”,
+    “There are two reasons why I wake up in the morning: my alarm clock and you. 我早上願意醒來為兩個理由: 鬧鐘和你。”,
+    “Being with you has made me so lame. I think I like it. 跟你在一起讓我變得很廢。不過我喜歡。”,
+    “Sorry, I got loss in your eyes again. 不好意思，我又再次迷失在你的眼裡。”,
+    “To the world you may be just one person. To the person you may be the world.對這世界來說，你也許只是某個人；但對某個人來說，你卻是全世界。”,
+    “If I know what love is, it is because of you. 因為你，我懂得了愛。”,
+    “I’ll think of you every step of the way. 我會想你，在漫漫長路的每一步。”,
+    “Passionate love is a quenchless thirst. 熱烈的愛情是不可抑制的渴望。”,
+    “At the touch of love everyone becomes a poet. 每一個沐浴在愛河中的人都是詩人。”,
+    “Love is a vine that grows into our hearts. 愛是長在我們心裏的藤蔓。”,
+    “It is impossible to love and to be wise. 要愛又兼有理性是不可能的。”,
+    “Faults are sick when love is thin.  一朝情義淡，樣樣不順眼。”,
+    “Life is the flower for which love is the honey. 生命如花，愛情是蜜。”,
+    “The road to a lover’s house is never long. 通往愛人家裏的路總不會漫長。”,
+    “Love is hard to get into, but harder to get out of. 愛很難投入，但一旦投入，便更難走出。”,
+    “Love is not only a sentiment but also an art. 愛情不僅僅是感情，它也是藝術。”,
+    “Every man is a poet when he is in love. 每個戀愛中的人都是詩人。”,
+    “Love is like the moon, when it does not increase, it decreases. 愛情就像月亮，不增則減。”,
+    “Love and a cough cannot be hid. 愛情跟咳嗽一樣是掩飾不了的。”,
+    “Love me little and love me long. 不求情意綿綿，但求天長地久。”,
+    “Being with you is like walking on a very clear morning. 和你在一起就像在一個清爽的早晨漫步。”,
+    “It is never too late to fall in love. 愛永遠不會嫌晚。”
+    “There is no hiding from lover’s eyes. 什麼也瞞不過戀人的眼睛。”,
+    “In love folly is always sweet. 戀愛中，幹傻事總是讓人感到十分美妙。”,
+    “In the very smallest cot there is room enough for a loving pair. 哪怕是最小的茅屋，對情人來說都有足夠的空間。”,
+    “Don’t try so hard, the best things come when you least expect them. 不要著急，最好的總會在最不經意的時候出現。”,
+    “You are everything when you are with me, and everything is you when you are not. 跟你在一起時，你是一切，你不在時，一切是你！”,
+    “If I could rearrange the alphabet, I’d put y and I together. 如果我能重新來排列字母，我要把y（你）跟I（我）在一起。”,
+    “Love is not a matter of counting the days. It’s making the days count. 愛情不是數着日子過去，它讓每個日子都變得有意義。”,
+    “Love you so i don’t wanna go to sleep, for reality is better than a dream. 愛你，所以不想入睡，因為真實比夢境還要美麗。”,
+    “There is no remedy for love but to love more. 治療愛的創傷，唯有加倍地去愛。”,
+    “No words are necessary between two loving hearts. 兩顆相愛的心之間不需要言語。”,
+    “The darkness is no darkness with you. 有了你，黑暗不再是黑暗。”,
+    “She who has never loved, has never lived. 人活著總要愛一回。”,
+    “Every day without you is like a book without pages. 沒有你的日子就像一本沒有書頁的書。”,
+    “If the while I think on you, all losses are restored, and sorrows end. 只要我一想起你，所有的失落和遺憾煙消雲散。”,
+    “Before meeting you, I indulge in the past. After meeting you, I plan to spend the rest of my life. 遇見你之前，我沉迷過往；遇見你以後，我盤算餘生。”,
+    “I want that my love to you will turn into bright sunlight so that to warm your heart. 我想將對你的感情化作暖暖的陽光，期待那灑落的光明能溫暖你的心房。”,
+    “I miss you so much already and I haven’t even left yet! 儘管還不曾離開，我已對你朝思暮想！”,
+    “Tell me you are mine. I’ll be yours through all the years, till the end of time. 請告訴我你是我的。歲歲年年，我都屬於你，永遠永遠。”,
+   “I need you like i need the air to breathe. 我需要你，正如我需要呼吸空氣。”,
+    “The best love is probably, I make your heart move you make me feel at ease.最好的愛情大概是：我讓你心動，你讓我心安。”,
+    “You protect the world, I protect you. 你保護世界，我保護你。”,
+    “I am fortunate to meet you in such a big world. 世界很大，難得的是遇到了你。”,
+    “Every single person has at least one secret that would break your heart. 每個單身的人背後，至少藏著一個讓人心碎的秘密。”,
+    “It’s a good thing to like someone. 喜歡上某人，是一件美好事情。”,
+    “I will be better, because of you, but not for you. 我會變得更好，是因為你，但不是為了你。”,
+    “We’re best mates. He makes me laugh every day. 我們是最棒的伴侶，他每天都可以讓我笑。”,
+    “I see no reason to wait. When you know it’s right, it’s right. 我沒有看到任何需要等待的理由，當你覺得時間對了，那就是對的。”,
+    “Someone who wants to be with you, will be with you. 真心想跟你在一起支持你的人，就永遠會陪著你！”,
+    “Whatever happens tomorrow, we had today. I’ll always remember it. 無論明天發生什麼事，至少我們擁有當下。”,
+    “Affection is when you see someone’s strength; love is when you accept someone’s flaws. 喜歡，是看到一個人的優點；愛，是接受一個人的缺點。”,
+    “If you would be loved, love and be lovable. 想被人愛，就要去愛別人，並讓自己可愛。”,
+    “Anything you want me to do, I remember, you remember. 你要帶我做的任何事，我都記得，你也記得。”,
+    “The two most beautiful things are: sleep with you. 最美好的兩件事是：睡覺和你，簡稱和你一起睡。”,
+    “Some people can not tell where good, but who can not be replaced. 有些人說不清哪裡好，但就是誰也替代不了。”,
+    “Hold your hand and don’t let it go. 抓住了手就別放，愛對了人就走下去。”,
+    “Always have, always will. 一直愛你，始終如一。”
+
+
   ]
 };
 
 // 切換字體
 function setFont(lang) {
-  document.body.style.fontFamily = lang === 'zh' ? '"微軟正黑體", "Microsoft JhengHei", sans-serif' : 'Comic Sans MS, sans-serif';
+  document.body.style.fontFamily = lang === 'zh' ? '"Microsoft JhengHei", sans-serif' : 'Comic Sans MS, sans-serif';
 }
 
+// 生成名言
 function generateQuote() {
   const cat = document.getElementById('category').value;
   const lang = document.getElementById('language').value;
@@ -231,9 +221,6 @@ function generateQuote() {
   const randomIndex = Math.floor(Math.random() * quotes.length);
   const quoteText = quotes[randomIndex];
 
-  const bgIndex = Math.floor(Math.random() * backgrounds.length);
-  document.body.style.backgroundImage = `url(${backgrounds[bgIndex]})`;
-
   document.getElementById('quote').textContent = quoteText;
 
   const sound = document.getElementById('sound');
@@ -241,6 +228,7 @@ function generateQuote() {
   sound.play();
 }
 
+// 複製分享連結
 function copyLink() {
   const cat = document.getElementById('category').value;
   const lang = document.getElementById('language').value;
@@ -248,11 +236,15 @@ function copyLink() {
   const url = `${window.location.href}?cat=${encodeURIComponent(cat)}&lang=${encodeURIComponent(lang)}&quote=${encodeURIComponent(randomQuote)}`;
   const input = document.getElementById('shareLink');
   input.value = url;
-  input.select();
-  document.execCommand('copy');
-  alert('分享連結已複製到剪貼簿！');
+
+  navigator.clipboard.writeText(url).then(() => {
+    alert('分享連結已複製到剪貼簿！');
+  }).catch(err => {
+    alert('複製失敗，請手動複製：' + url);
+  });
 }
 
+// 載入時顯示 URL 名言
 window.onload = () => {
   const params = new URLSearchParams(window.location.search);
   if (params.has('quote')) {
