@@ -67,13 +67,58 @@
 <audio id="sound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
 
 <script>
-const backgrounds = [
-  'https://source.unsplash.com/1600x900/?nature,water',
-  'https://source.unsplash.com/1600x900/?sunset',
-  'https://source.unsplash.com/1600x900/?mountain',
-  'https://source.unsplash.com/1600x900/?sky',
-  'https://source.unsplash.com/1600x900/?stars'
-];
+const categoryBackgrounds = {
+  success: 'linear-gradient(135deg, #FFA500, #FFD700)', // 橘黃
+  mindset: 'linear-gradient(135deg, #FF4500, #8A2BE2)', // 紅紫
+  life: 'linear-gradient(135deg, #1E90FF, #00CED1)', // 藍青
+  love: 'linear-gradient(135deg, #FF69B4, #FFB6C1)' // 粉紅暖色
+};
+
+const categoryImages = {
+  success: [
+    'https://source.unsplash.com/1600x900/?success,achievement',
+    'https://source.unsplash.com/1600x900/?work,goal'
+  ],
+  mindset: [
+    'https://source.unsplash.com/1600x900/?mind,brain',
+    'https://source.unsplash.com/1600x900/?courage,focus'
+  ],
+  life: [
+    'https://source.unsplash.com/1600x900/?nature,life',
+    'https://source.unsplash.com/1600x900/?sky,journey'
+  ],
+  love: [
+    'https://source.unsplash.com/1600x900/?love,heart',
+    'https://source.unsplash.com/1600x900/?couple,romance'
+  ]
+};
+
+function generateQuote() {
+  const cat = document.getElementById('category').value;
+  const lang = document.getElementById('language').value;
+  setFont(lang);
+
+  const quotes = lang === 'zh' ? quotes_zh[cat] : quotes_en[cat];
+  const randomIndex = Math.floor(Math.random() * quotes.length);
+  const quoteText = quotes[randomIndex];
+  document.getElementById('quote').textContent = quoteText;
+
+  // 隨機選圖片
+  const images = categoryImages[cat];
+  const randomImg = images[Math.floor(Math.random() * images.length)];
+
+  // 設定漸層 + 圖片疊加
+  document.body.style.backgroundImage = `${categoryBackgrounds[cat]}, url(${randomImg})`;
+  document.body.style.backgroundSize = 'cover';
+  document.body.style.backgroundPosition = 'center';
+
+  // 播放音效
+  const sound = document.getElementById('sound');
+  sound.currentTime = 0;
+  sound.play();
+}
+</script>
+
 
 // 中文名言分類
 const quotes_zh = {
