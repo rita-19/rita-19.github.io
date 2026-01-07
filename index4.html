@@ -325,7 +325,9 @@ function speakEnglish(text) {
 // ================= 生成名言 =================
 function generateQuote(catFromUrl = null, indexFromUrl = null) {
   const cat = catFromUrl || document.getElementById("category").value;
-  const list = quotes_en[cat]; // 👉 用中英同一句（你英文庫本來就有）
+  const lang = document.getElementById("language").value;
+  const list = (lang === "en") ? quotes_en[cat] : quotes_zh[cat];
+
 
   const index = indexFromUrl !== null
     ? indexFromUrl
