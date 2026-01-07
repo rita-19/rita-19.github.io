@@ -313,10 +313,6 @@ const quotes_en = {
   ]
 };
 
-// 切換字體
-function setFont(lang) {
-  document.body.style.fontFamily = lang === 'zh' ? '"Microsoft JhengHei", sans-serif' : 'Comic Sans MS, sans-serif';
-}
 // ================= 英文朗讀 =================
 function speakEnglish(text) {
   if (!window.speechSynthesis) return;
@@ -326,56 +322,37 @@ function speakEnglish(text) {
   speechSynthesis.cancel();
   speechSynthesis.speak(u);
 }
-// 生成名言
-function generateQuote() {
-    const cat = document.getElementById('category').value;
-    const lang = document.getElementById('language').value;
+// ================= 生成名言 =================
+function generateQuote(catFromUrl = null, indexFromUrl = null) {
+  const cat = catFromUrl || document.getElementById("category").value;
+  const list = quotes_en[cat]; // 👉 用中英同一句（你英文庫本來就有）
 
-    // 選擇對應語言的名言
-    const quotes = lang === 'zh' ? quotes_zh[cat] : quotes_en[cat];
-    const randomIndex = Math.floor(Math.random() * quotes.length);
-    const quoteText = quotes[randomIndex];
+  const index = indexFromUrl !== null
+    ? indexFromUrl
+    : Math.floor(Math.random() * list.length);
 
-    // 將文字切成中英文部分
-    const chinesePart = quoteText.replace(/[A-Za-z0-9,.!?'"()\-:]+/g, '').trim();
-    const englishPart = quoteText.replace(/[^A-Za-z0-9,.!?'"()\-:]+/g, '').trim();
+  const text = list[index];
 
-    // 顯示名言並套用顏色
-    document.getElementById('quote').innerHTML = `
-        <span class="chinese">${chinesePart}</span> 
-        <span class="english">${englishPart}</span>
-    `;
+  currentCat = cat;
+  currentIndex = index;
 
-    // 套用字體顏色
-    setFont(lang);
+  // 🔹 拆中英文
+  const english = text.match(/[A-Za-z0-9.,!?'"()\-: ]+/g)?.join("").trim() || "";
+  const chinese = text.replace(/[A-Za-z0-9.,!?'"()\-: ]+/g, "").trim();
 
-    // 播放音效（可選）
-    const sound = document.getElementById('sound');
-    if (sound) {
-        sound.currentTime = 0;
-        sound.play();
-    }
-}
+  document.getElementById("quote").innerHTML = `
+    <div class="english">${english}</div>
+    <div class="chinese">${chinese}</div>
+  `;
 
-// 切換字體與顏色
-function setFont(lang) {
-    const quoteEl = document.getElementById('quote');
-    if (lang === 'zh') {
-        quoteEl.querySelector('.chinese').style.color = '#ffffff'; // 中文白
-        quoteEl.querySelector('.english').style.color = '#FFD700'; // 英文金
-        quoteEl.style.fontFamily = '"Microsoft JhengHei", sans-serif';
-    } else {
-        quoteEl.querySelector('.chinese').style.color = '#ffffff';
-        quoteEl.querySelector('.english').style.color = '#FFD700';
-        quoteEl.style.fontFamily = 'Comic Sans MS, sans-serif';
-    }
-}
+  // 🔊 英文朗讀
+  speakEnglish(english);
 
-  const sound = document.getElementById('sound');
+  // 🔔 音效
+  const sound = document.getElementById("sound");
   sound.currentTime = 0;
   sound.play();
 }
-
 // 複製分享連結
 function copyLink() {
   const cat = document.getElementById('category').value;
