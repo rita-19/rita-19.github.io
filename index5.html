@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>每日一句・暖心小語</title>
+
+<style>
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #000;
+  color: #fff;
+  font-family: "Microsoft JhengHei", sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+}
+
+h1 { margin-bottom: 20px; }
+
+select, button, input {
+  margin: 6px;
+  padding: 8px 14px;
+  font-size: 16px;
+  border-radius: 6px;
+  border: none;
+}
+
+select {
+  background: #111;
+  color: #fff;
+  border: 1px solid #1E90FF;
+}
+
+button {
+  background: #4CAF50;
+  color: #fff;
+  cursor: pointer;
+}
+
+button:hover { background: #45a049; }
+
+#quote {
+  max-width: 800px;
+  margin-top: 20px;
+  line-height: 1.6;
+}
+
+.english {
+  color: #FFD700;
+  font-family: "Comic Sans MS", cursive;
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+
+.chinese {
+  color: #fff;
+  font-size: 26px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🪐 每日一句・暖心小語</h1>
+
+<select id="category">
+  <option value="success">成功 / 努力</option>
+  <option value="mindset">心態 / 勇氣</option>
+  <option value="life">人生 / 智慧</option>
+  <option value="love">愛情 / 友情</option>
+</select>
+
+<div id="quote">請按下「生成名言」</div>
+
+<button onclick="generateQuote()">生成名言</button>
+<button onclick="copyLink()">生成分享連結</button>
+
+<input id="shareLink" readonly style="width:80%">
+
+<audio id="sound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
+
+<script>
+// ================= 名言資料 =================
+const quotes = {
+  success: [
+    "Failure is the mother of success. 失敗乃成功之母。",
+    "If you really want something, go get it. 如果你真的想要，就去爭取。"
+  ],
+  mindset: [
+    "Stars can’t shine without darkness. 沒有黑暗，星星不會閃耀。"
+  ],
+  life: [
+    "Life is short and you deserve to be happy. 人生短暫，你值得快樂。"
+  ],
+  love: [
+    "You complete me. 你使我人生完整。"
+  ]
+};
+
+let currentCat = "";
+let currentIndex = -1;
+
+// ================= 英文朗讀 =================
+function speakEnglish(text) {
+  if (!window.speechSynthesis) return;
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "en-US";
+  u.rate = 0.9;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
+}
+
+// ================= 生成名言 =================
+function generateQuote(catFromUrl = null, indexFromUrl = null) {
+  const cat = catFromUrl || document.getElementById("category").value;
+  const list = quotes[cat];
+
+  const index = indexFromUrl !== null
+    ? indexFromUrl
+    : Math.floor(Math.random() * list.length);
+
+  const text = list[index];
+
+  currentCat = cat;
+  currentIndex = index;
+
+  const english = text.match(/[A-Za-z0-9.,!?'"()\-: ]+/g)?.join("").trim() || "";
+  const chinese = text.replace(/[A-Za-z0-9.,!?'"()\-: ]+/g, "").trim();
+
+  document.getElementById("quote").innerHTML = `
+    <div class="english">${english}</div>
+    <div class="chinese">${chinese}</div>
+  `;
+
+  if (english) speakEnglish(english);
+
+  const sound = document.getElementById("sound");
+  sound.currentTime = 0;
+  sound.play();
+}
+
+// ================= 分享連結 =================
+function copyLink() {
+  if (currentIndex === -1) {
+    alert("請先生成名言");
+    return;
+  }
+
+  const url =
+    location.origin + location.pathname +
+    `?cat=${currentCat}&id=${currentIndex}`;
+
+  document.getElementById("shareLink").value = url;
+  navigator.clipboard.writeText(url);
+  alert("分享連結已複製！");
+}
+
+// ================= 載入還原 =================
+window.onload = () => {
+  const p = new URLSearchParams(location.search);
+  if (p.has("cat") && p.has("id")) {
+    document.getElementById("category").value = p.get("cat");
+    generateQuote(p.get("cat"), Number(p.get("id")));
+  }
+};
+</script>
+
+</body>
+</html>
