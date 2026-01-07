@@ -8,8 +8,8 @@
 body {
     margin: 0;
     font-family: "Microsoft JhengHei", sans-serif;
-    background-color: #0a0a0a; /* 深黑底 */
-    color: #ffffff;             /* 主要文字白色 */
+    background-color: #000000; /* 黑底 */
+    color: #ffffff;             /* 中文白字 */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -26,24 +26,24 @@ body {
     padding: 20px;
     border-radius: 10px;
     margin-bottom: 20px;
-    color: #ffffff; /* 白字 */
+    line-height: 1.6;
 }
 
-/* 中文字體顏色 */
-.chinese {
+/* 中文文字 */
+#quote .chinese {
+    color: #ffffff; /* 白色 */
     font-family: "Microsoft JhengHei", sans-serif;
-    color: #ffffff; /* 中文白字 */
 }
 
-/* 英文字體顏色 */
-.english {
+/* 英文字 */
+#quote .english {
+    color: #FFD700; /* 金色 */
     font-family: "Comic Sans MS", cursive, sans-serif;
-    color: #FFD700; /* 英文金色，高對比 */
 }
 
 /* 連結樣式 */
 a {
-    color: #1E90FF !important;  /* 亮藍色連結 */
+    color: #1E90FF; /* 亮藍色 */
     text-decoration: underline;
     padding: 5px 8px;
     border-radius: 5px;
@@ -66,16 +66,24 @@ button:hover {
     background-color: #45a049;
 }
 
-/* 分享連結欄 */
-#shareLink {
-    width: 80%;
-    margin-top: 10px;
-    padding: 5px;
-    border-radius: 5px;
-    border: 1px solid #fff;
-    background-color: #222;
-    color: #fff;
+/* 下拉選單樣式 */
+select {
+    background-color: #0a0a0a; /* 深黑底 */
+    color: #ffffff;             /* 白字 */
+    border: 1px solid #1E90FF;  /* 藍色邊框 */
+    border-radius: 5px;         /* 圓角 */
+    padding: 8px 12px;
+    font-size: 16px;
+    outline: none;
+    cursor: pointer;
 }
+
+/* 下拉選單 hover / focus 效果 */
+select:hover, select:focus {
+    border-color: #FFD700;      /* 金色邊框 */
+    background-color: #111;     /* 稍亮的黑 */
+}
+
 </style>
 </head>
 <body>
@@ -320,7 +328,49 @@ function generateQuote() {
   const randomIndex = Math.floor(Math.random() * quotes.length);
   const quoteText = quotes[randomIndex];
 
-  document.getElementById('quote').textContent = quoteText;
+  function generateQuote() {
+    const cat = document.getElementById('category').value;
+    const lang = document.getElementById('language').value;
+
+    // 選擇對應語言的名言
+    const quotes = lang === 'zh' ? quotes_zh[cat] : quotes_en[cat];
+    const randomIndex = Math.floor(Math.random() * quotes.length);
+    const quoteText = quotes[randomIndex];
+
+    // 將文字切成中英文部分
+    const chinesePart = quoteText.replace(/[A-Za-z0-9,.!?'"()\-:]+/g, '').trim();
+    const englishPart = quoteText.replace(/[^A-Za-z0-9,.!?'"()\-:]+/g, '').trim();
+
+    // 顯示名言並套用顏色
+    document.getElementById('quote').innerHTML = `
+        <span class="chinese">${chinesePart}</span> 
+        <span class="english">${englishPart}</span>
+    `;
+
+    // 套用字體顏色
+    setFont(lang);
+
+    // 播放音效（可選）
+    const sound = document.getElementById('sound');
+    if (sound) {
+        sound.currentTime = 0;
+        sound.play();
+    }
+}
+
+// 切換字體與顏色
+function setFont(lang) {
+    const quoteEl = document.getElementById('quote');
+    if (lang === 'zh') {
+        quoteEl.querySelector('.chinese').style.color = '#ffffff'; // 中文白
+        quoteEl.querySelector('.english').style.color = '#FFD700'; // 英文金
+        quoteEl.style.fontFamily = '"Microsoft JhengHei", sans-serif';
+    } else {
+        quoteEl.querySelector('.chinese').style.color = '#ffffff';
+        quoteEl.querySelector('.english').style.color = '#FFD700';
+        quoteEl.style.fontFamily = 'Comic Sans MS, sans-serif';
+    }
+}
 
   const sound = document.getElementById('sound');
   sound.currentTime = 0;
