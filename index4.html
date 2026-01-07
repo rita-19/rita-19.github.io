@@ -2,224 +2,224 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<title>多功能隨機名言生成器</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>隨機名言生成器</title>
 <style>
-body {
-    font-family: "Microsoft JhengHei", Arial, sans-serif;
+  body {
+    margin: 0;
+    font-family: "微軟正黑體", "Microsoft JhengHei", sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
     text-align: center;
-    padding: 50px;
-    transition: background 0.5s;
+    color: white;
     background-size: cover;
     background-position: center;
-    color: white;
-}
-h1 { margin-bottom: 20px; text-shadow: 2px 2px #000; }
-#quote-box {
-    margin-top: 30px;
+    transition: background 1s ease;
     padding: 20px;
-    min-height: 120px;
-    font-size: 22px;
-    font-weight: bold;
-    border-radius: 10px;
-    color: white;
-    text-shadow: 1px 1px #000;
-    transition: background 0.3s;
-}
-select, button {
-    font-size: 16px;
-    padding: 8px 15px;
+  }
+  #quote {
+    font-size: 1.8em;
+    margin: 20px 0;
+    max-width: 90%;
+  }
+  #author {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+  }
+  button, select, input {
+    padding: 10px 15px;
     margin: 5px;
-    cursor: pointer;
-}
-button {
-    background-color: #2196F3;
-    border: none;
-    color: white;
+    font-size: 1em;
     border-radius: 5px;
-}
-#share-box {
-    margin-top: 20px;
-}
-#share-box input {
-    width: 70%;
-    padding: 5px;
-    font-size: 14px;
-}
-#share-box button {
-    padding: 5px 10px;
-    font-size: 14px;
-}
+    border: none;
+    cursor: pointer;
+  }
+  button:hover { opacity: 0.85; }
+  select, input { font-family: inherit; }
 </style>
 </head>
 <body>
 
-<h1>多功能隨機名言生成器</h1>
+<h1>隨機名言生成器</h1>
 
-<label for="language">語言:</label>
-<select id="language">
-    <option value="zh">中文</option>
-    <option value="en">English</option>
-</select>
-
-<label for="category">類別:</label>
 <select id="category">
-    <option value="all">隨機 / Random</option>
+  <option value="success">成功 / 努力</option>
+  <option value="mindset">心態 / 勇氣</option>
+  <option value="life">人生哲理 / 智慧</option>
+  <option value="love">愛情 / 友情</option>
 </select>
+
+<select id="language">
+  <option value="zh">中文</option>
+  <option value="en">英文</option>
+</select>
+
+<div id="quote">按下按鈕生成名言</div>
+<div id="author"></div>
 
 <button onclick="generateQuote()">生成名言</button>
+<button onclick="copyLink()">生成分享連結</button>
+<input type="text" id="shareLink" readonly style="width:80%; margin-top:10px;">
 
-<div id="quote-box">按下按鈕生成名言！</div>
-
-<div id="share-box">
-    <input type="text" id="share-link" readonly>
-    <button onclick="copyLink()">複製連結</button>
-</div>
-
-<audio id="sound" src="https://www.myinstants.com/media/sounds/button-3.mp3"></audio>
+<audio id="sound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
 
 <script>
-// --- 句子資料 ---
-const quotes = {
-    zh: {
-        "名言": [
-            "人生苦短，必須性感。",
-            "知識就是力量。",
-            "失敗乃成功之母。",
-            "每天進步一點點。",
-            "笑一笑，十年少。",
-            "行動勝於空談。",
-            "學會等待，也是種智慧。",
-            "經驗是最好的老師。",
-            "別人的眼光不要影響你的人生。",
-            "珍惜眼前擁有的一切。"
-        ],
-        "鼓勵": [
-            "今天不努力，明天努力找工作。",
-            "不要讓昨天的失敗影響今天的心情。",
-            "相信自己，你可以做到！",
-            "加油，明天會更好！",
-            "別怕慢，怕停下來。"
-        ],
-        "智慧": [
-            "計畫沒有行動等於零。",
-            "凡事量力而行，順其自然。",
-            "知足常樂。",
-            "努力但不焦慮。",
-            "沉默是金。"
-        ],
-        "運勢": [
-            "今天適合學習新技能。",
-            "今天可能會遇到驚喜。",
-            "保持心情愉快，運氣自然好。",
-            "小心財務支出，不要衝動。",
-            "今天適合與朋友互動。"
-        ]
-    },
-    en: {
-        "Quote": [
-            "Life is short, make it count.",
-            "Knowledge is power.",
-            "Failure is the mother of success.",
-            "Improve a little every day.",
-            "A smile will take you far.",
-            "Action is better than words.",
-            "Patience is a virtue.",
-            "Experience is the best teacher.",
-            "Don’t let others define you.",
-            "Cherish what you have."
-        ],
-        "Encouragement": [
-            "Keep going, you can do it!",
-            "Don’t let yesterday affect today.",
-            "Believe in yourself.",
-            "Tomorrow will be better.",
-            "Better slow progress than standing still."
-        ],
-        "Wisdom": [
-            "Plan without action is meaningless.",
-            "Measure what you can, go with the flow.",
-            "Contentment brings happiness.",
-            "Work hard but stay calm.",
-            "Silence is golden."
-        ],
-        "Fortune": [
-            "Today is good to learn something new.",
-            "You may meet a surprise today.",
-            "Keep happy, luck follows.",
-            "Be careful with spending today.",
-            "Today is good for social interaction."
-        ]
-    }
-};
-
-// --- 類別下拉選單初始化 ---
-const categorySelect = document.getElementById("category");
-function initCategories() {
-    const lang = document.getElementById("language").value;
-    categorySelect.innerHTML = '<option value="all">隨機 / Random</option>';
-    Object.keys(quotes[lang]).forEach(cat => {
-        categorySelect.innerHTML += `<option value="${cat}">${cat}</option>`;
-    });
-}
-initCategories();
-document.getElementById("language").addEventListener("change", initCategories);
-
-// --- 背景圖片 ---
 const backgrounds = [
-    "https://source.unsplash.com/800x600/?nature,water",
-    "https://source.unsplash.com/800x600/?nature,forest",
-    "https://source.unsplash.com/800x600/?sky",
-    "https://source.unsplash.com/800x600/?sunrise",
-    "https://source.unsplash.com/800x600/?mountain"
+  'https://source.unsplash.com/1600x900/?nature,water',
+  'https://source.unsplash.com/1600x900/?sunset',
+  'https://source.unsplash.com/1600x900/?mountain',
+  'https://source.unsplash.com/1600x900/?sky',
+  'https://source.unsplash.com/1600x900/?stars'
 ];
 
-// --- 生成名言 ---
+// 中文名言分類
+const quotes_zh = {
+  success: [
+    "不懈的努力是成功的基石。- 未知",
+    "成功的花，人們只驚羨她現時的明艷，然而當初她的芽兒，卻浸透了奮鬥的淚泉。- 未知",
+    "你的態度決定了你的高度。- 未知",
+    "成功並非偶然，而是不斷努力的結果。- 未知",
+    "成功從不眷顧等待的人。- 未知",
+    "第一步是你必須說：「我辦得到」 — 威爾.史密斯",
+    "成功不是終點，努力才是過程。- 未知",
+    "努力不一定成功，但放棄一定失敗。- 未知",
+    "只要你肯努力，沒有什麼是不可能的。- 未知",
+    "每一個努力的瞬間，都是在為成功鋪路。- 未知"
+  ],
+  mindset: [
+    "勇敢面對困難，生活才會更加精彩。- 未知",
+    "不怕路長，只怕志短。- 未知",
+    "接受自己的極限，我們才能超越自己！- 愛因斯坦",
+    "行動是成功的基礎，沒有行動，一切都是空談。- 洛克菲勒",
+    "信念是我們實現夢想的力量源泉。- 未知",
+    "效率是做好事情，效能是做對的事情。- 彼得·德魯克",
+    "完成工作的方法，是愛惜每一分鐘。- 達爾文",
+    "勇敢地追求夢想，不要退縮。- 未知",
+    "夢想總有它實現的道理。- 未知",
+    "面對困難時，保持積極心態是最強的武器。- 未知"
+  ],
+  life: [
+    "人生就像騎單車，要保持平衡，就必須一直向前。- 愛因斯坦",
+    "二十年後，你會因為沒做的事而比做過的事更後悔。- 馬克·吐溫",
+    "我不能改變風向，但我能調整帆的方向。- 吉米.迪恩",
+    "天才是百分之一的靈感，加上百分之九十九的汗水。- 愛迪生",
+    "無論你認為自己行還是不行，你都是對的。- 亨利·福特",
+    "成功就是從失敗到失敗，也依然不改熱情。- 丘吉爾",
+    "每一個你不滿意的現在，都有一個你沒有努力的曾經。- 未知",
+    "不經歷風雨，怎能見彩虹。- 未知",
+    "我們都生活在陰溝裡，但仍有些人仰望星空。- 奧斯卡·王爾德",
+    "凡事有因，皆有果。- 未知"
+  ]
+};
+
+// 英文名言分類
+const quotes_en = {
+  success: [
+    "No cross, no crown. 不經歷風雨，怎麼遇見彩虹。",
+    "Sometime ever, sometime never. 相聚有時，後會無期。",
+    "The greatest test of courage on earth is to bear defeat without losing heart. 世界上對勇氣的最大考驗是忍受失敗而不喪失信心。",
+    "Energy and persistent conquer all things. 能量和堅持可以克服一切。",
+    "The first step is as good as half over. 第一步是最關鍵的一步。",
+    "Failure is the mother of success. 失敗乃成功之母。",
+    "Genius is an infinite capacity for taking pains. 所謂的天才是不斷地承受痛楚。",
+    "A man is only as good as what he loves. 一個人要用他所愛的東西有多好來衡量。",
+    "Journey of a thousand miles begins with single step. 千里之行，始於足下。",
+    "Better late than never. 別讓過去悄悄偷走了你的當下。"
+  ],
+  mindset: [
+    "Treat yourself well. 善待你自己。",
+    "No fear of words, no fear of years. 不懼人言，不畏歲月。",
+    "Stars can’t shine without darkness. 如果沒有黑暗，星星如何閃耀。",
+    "Be cheerful and hopeful. 樂觀向上，充滿希望。",
+    "Don’t let the past steal your present. 只要開始，雖晚不遲。",
+    "You don’t have time to be timid. 人生沒有時間膽怯。",
+    "It’s up to you how far you’ll go. 能走多遠取決於你自己。",
+    "Make each day your masterpiece. 讓每一天成為你的傑作。",
+    "Above all, don’t lie to yourself. 最重要的是不要欺騙自己。",
+    "Light tomorrow with today. 用現在點亮未來。"
+  ],
+  life: [
+    "Travel far enough you meet yourself. 走得足夠遠，你就會遇上自己。",
+    "Life is short and you deserve to be happy. 生命苦短，你應該過的開心點。",
+    "Time is that we do not come loose. 時光不老，我們不散。",
+    "You can’t be perfect but you can be unique. 你不能十全十美，但你能獨一無二。",
+    "Don’t compare your life with others. There’s no comparison between the sun and the moon. They shine when it’s their time. 別拿你的人生和別人的比較。太陽和月亮沒有可比性。它們都在屬於自己的時刻發光。",
+    "I am not afraid of tomorrow for I have seen yesterday and love today. 我不害怕明天，因為我經歷過昨天，也熱愛今天。",
+    "Only they who fulfill their duties in everyday matters will fulfill them on great occasions. 只有在日常生活中盡責的人才會在重大時刻盡責。",
+    "All things in their being are good for something. 天生我才必有用。",
+    "There’s only one corner of the universe you can be sure of improving, and that’s your own self. 這個宇宙中只有一個角落你肯定可以改進，那就是你自己。",
+    "Difficult circumstances serve as a textbook of life for people. 困難坎坷是人們的生活教科書。"
+  ],
+  love: [
+    "You had me at 'hello'. 第一眼見到你時，我就被你征服了。",
+    "You complete me. 你使我人生完整。",
+    "You are the best thing I never planned. 你是我最美好的意外。",
+    "Being with you has made me so lame. I think I like it. 跟你在一起讓我變得很廢。不過我喜歡。",
+    "To the world you may be just one person. To the person you may be the world. 對這世界來說，你也許只是某個人；但對某個人來說，你卻是全世界。",
+    "If I know what love is, it is because of you. 因為你，我懂得了愛。",
+    "Love me little and love me long. 不求情意綿綿，但求天長地久。",
+    "Life is the flower for which love is the honey. 生命如花，愛情是蜜。",
+    "Being with you is like walking on a very clear morning. 和你在一起就像在一個清爽的早晨漫步。",
+    "It is never too late to fall in love. 愛永遠不會嫌晚。",
+    "If I know what love is, it is because of you. 因為你，我懂得了愛。",
+    "I’ll think of you every step of the way. 我會想你，在漫漫長路的每一步。",
+    "Love is not only a sentiment but also an art. 愛情不僅僅是感情，它也是藝術。",
+    "Every man is a poet when he is in love. 每個戀愛中的人都是詩人。",
+    "Love is like the moon, when it does not increase, it decreases. 愛情就像月亮，不增則減。",
+    "No words are necessary between two loving hearts. 兩顆相愛的心之間不需要言語。",
+    "Being with you is like walking on a very clear morning. 和你在一起就像在一個清爽的早晨漫步。",
+    "You are everything when you are with me, and everything is you when you are not. 跟你在一起時，你是一切，你不在時，一切是你！"
+  ]
+};
+
+// 切換字體
+function setFont(lang) {
+  document.body.style.fontFamily = lang === 'zh' ? '"微軟正黑體", "Microsoft JhengHei", sans-serif' : 'Comic Sans MS, sans-serif';
+}
+
 function generateQuote() {
-    const lang = document.getElementById("language").value;
-    const cat = document.getElementById("category").value;
-    let selectedCat = cat;
-    if(cat === "all"){
-        const cats = Object.keys(quotes[lang]);
-        selectedCat = cats[Math.floor(Math.random() * cats.length)];
-    }
-    const quoteArray = quotes[lang][selectedCat];
-    const quote = quoteArray[Math.floor(Math.random() * quoteArray.length)];
+  const cat = document.getElementById('category').value;
+  const lang = document.getElementById('language').value;
+  setFont(lang);
 
-    // 更新文字
-    const box = document.getElementById("quote-box");
-    box.textContent = `${selectedCat}：${quote}`;
+  const quotes = lang === 'zh' ? quotes_zh[cat] : quotes_en[cat];
+  const randomIndex = Math.floor(Math.random() * quotes.length);
+  const quoteText = quotes[randomIndex];
 
-    // 隨機背景
-    const bg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
-    document.body.style.backgroundImage = `url(${bg})`;
+  const bgIndex = Math.floor(Math.random() * backgrounds.length);
+  document.body.style.backgroundImage = `url(${backgrounds[bgIndex]})`;
 
-    // 播放音效
-    document.getElementById("sound").play();
+  document.getElementById('quote').textContent = quoteText;
 
-    // 生成分享連結
-    const baseURL = window.location.href.split('?')[0]; // 只保留主網址
-    const shareText = encodeURIComponent(`${quote} (${selectedCat})`);
-    document.getElementById("share-link").value = `${baseURL}?quote=${shareText}`;
+  const sound = document.getElementById('sound');
+  sound.currentTime = 0;
+  sound.play();
 }
 
-// --- 複製連結 ---
 function copyLink() {
-    const input = document.getElementById("share-link");
-    input.select();
-    input.setSelectionRange(0, 99999);
-    document.execCommand("copy");
-    alert("已複製連結到剪貼簿！");
+  const cat = document.getElementById('category').value;
+  const lang = document.getElementById('language').value;
+  const randomQuote = document.getElementById('quote').textContent;
+  const url = `${window.location.href}?cat=${encodeURIComponent(cat)}&lang=${encodeURIComponent(lang)}&quote=${encodeURIComponent(randomQuote)}`;
+  const input = document.getElementById('shareLink');
+  input.value = url;
+  input.select();
+  document.execCommand('copy');
+  alert('分享連結已複製到剪貼簿！');
 }
 
-// --- 如果網址有 quote 參數，自動顯示 ---
 window.onload = () => {
-    const params = new URLSearchParams(window.location.search);
-    if(params.has("quote")){
-        const text = decodeURIComponent(params.get("quote"));
-        document.getElementById("quote-box").textContent = text;
-    }
-}
+  const params = new URLSearchParams(window.location.search);
+  if (params.has('quote')) {
+    const quoteText = params.get('quote');
+    document.getElementById('quote').textContent = quoteText;
+    const lang = params.get('lang') || 'zh';
+    setFont(lang);
+  }
+};
 </script>
-
 </body>
 </html>
